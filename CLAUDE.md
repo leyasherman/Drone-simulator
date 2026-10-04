@@ -1,71 +1,76 @@
-# CLAUDE.md — правила проекта
+# CLAUDE.md: project rules
 
-Браузерный FPV-симулятор дронов, повторяющий механику the reference sim (только /sim, не главная).
-План: [PLAN.md](PLAN.md). Журнал решений: [DECISIONS.md](DECISIONS.md).
-Исследование и справка: `sendline-main/docs/research/` (GUIDE.md, BUILD.md, internals notes).
+Browser FPV drone simulator that copies the mechanics of the reference sim.
+Plan: [PLAN.md](PLAN.md). Decision log: [DECISIONS.md](DECISIONS.md).
+Research: `sendline-main/docs/research/` (GUIDE.md, BUILD.md, internals notes).
+What the original does: `docs/reference/`.
 
-## Стек
-- TypeScript (strict), Three.js, Vite. Без React и Next.js: UI на HTML/CSS поверх канваса.
-- Тесты: Vitest. Линт: ESLint + Prettier.
-- Валидация данных (уроки, сообщения сети): Zod.
-- Фронт: Vercel (статическая сборка `dist/`). Бэкенд: Supabase (Auth, Postgres + RLS, RPC, Realtime, Storage).
-- Только бесплатные тарифы. Новые платные сервисы не добавлять без согласования.
+## Language
+- Everything written into the project (docs, notes, commits, code, comments) is in plain, short English. No filler.
+- Talk to the user in Russian.
 
-## Команды
+## Stack
+- TypeScript (strict), Three.js, Vite. No React or Next.js: UI is HTML/CSS over the canvas.
+- Tests: Vitest. Lint: ESLint + Prettier.
+- Data validation (lessons): Zod.
+- Frontend on Vercel (static `dist/`). Backend on Supabase (Auth, Postgres + RLS, RPC, Storage).
+- Free tiers only. Do not add paid services without asking.
+
+## Commands
 ```
-npm run dev        # локально, http://localhost:5173
+npm run dev        # local, http://localhost:5173
 npm run typecheck  # tsc --noEmit
 npm run lint
 npm test           # vitest run
-npm run build      # продакшн-сборка
+npm run build      # production build
 ```
 
-## Структура папок
+## Folders
 ```
 src/
-  main.ts          точка входа, сборка игры
-  sim/             модель полёта: часы, rates, микшер, контроллер, тело, профили дронов, ворота, replay.
-                   Чистый TS: никакого DOM, Three.js-сцены и Supabase (разрешены только мат. типы)
-  input/           клавиатура, gamepad/радио, калибровка, touch
-  audio/           синтез моторов, эффекты
-  world/           генерация карты из коробок, коллайдеры, модели дрона, ворота, призраки
-  render/          рендерер, камеры, пост-обработка, качество
-  game/            режимы и логика: free flight, уроки, skill chain, гонки, прогрессия, состояние игры
-  ui/              HUD, меню, онбординг, диалоги, стили и дизайн-токены
-  net/             клиент Supabase, auth, RPC-обёртки, realtime (мультиплеер, чат)
-content/           JSON уроков, гонок, достижений (сиды для БД)
-public/            статические ассеты (свои модели, иконки, маскот)
-supabase/migrations/  SQL-миграции (схема, RLS, функции)
-tests/             тесты Vitest
-sendline-main/     справочный прототип и исследование (только чтение, в сборку не входит)
+  main.ts          entry point, wires the game together
+  sim/             flight model: clock, rates, mixer, controller, rigid body, drone profiles, gates, recording.
+                   Plain TS: no DOM, no Three.js scene, no Supabase (maths types only)
+  input/           keyboard, gamepad, later radios
+  audio/           motor sound, effects
+  world/           box-based map, colliders, drone model, gates
+  render/          renderer, cameras, post-processing, quality
+  game/            modes and logic: free flight, lessons, lesson editor, game state
+  ui/              HUD, menus, dialogs, styles and design tokens
+  net/             Supabase client, auth, RPC wrappers
+content/           lesson JSON (database seeds)
+public/            static assets (our own models, icons, mascot)
+supabase/migrations/  SQL migrations (schema, RLS, functions)
+tests/             Vitest tests
+docs/reference/    notes on what the original does
+sendline-main/     reference prototype and research (read only, not in git, not in the build)
 ```
 
-## Правила кода
-- `src/sim/` остаётся независимым от фреймворков и детерминированным. Внутри шага 240 Гц не создавать объекты.
-- Физика только через фиксированный шаг 1/240 с; ничего из геймплея не завязывать на fps рендера.
-- Единые знаки: roll > 0 вправо, pitch > 0 нос вверх, yaw > 0 вправо, throttle 0..1.
-- Награды (XP, кредиты, достижения) начисляет только сервер через RPC. Клиент ничего не пишет в эти поля напрямую.
-- RLS на каждой таблице. Схема меняется только через новые файлы в `supabase/migrations/`.
-- Секреты только в `.env.local` (не коммитить). В клиенте только `VITE_SUPABASE_URL` и publishable/anon key.
-- Код и комментарии на английском; документы (PLAN, DECISIONS, отчёты) на русском.
+## Code rules
+- `src/sim/` stays framework-free and deterministic. No allocations inside the 240 Hz step.
+- Physics runs only on the fixed 1/240 s step. Nothing in gameplay depends on render fps.
+- Signs everywhere: roll > 0 is right, pitch > 0 is nose up, yaw > 0 is right, throttle is 0..1.
+- XP and progress rewards are granted only by the server through RPC. The client never writes those fields directly.
+- RLS on every table. Schema changes only through new files in `supabase/migrations/`.
+- Secrets only in `.env.local` (never committed). The client gets only `VITE_SUPABASE_URL` and the anon key.
 
-## Чего нельзя копировать
-- Ассеты, модели, текстуры, маскота (крэш-тест манекен), иконки, шрифты, тексты реплик и интерфейса,
-  названия the reference sim. Стиль похожий (дневной low-poly мир, светлые карточки), исполнение своё.
-- Бренд Sendline из `sendline-main/brand/`. Код `sendline-main/` не копируем (D-005): пишем свой,
-  а оттуда берём только формулы и константы как справку.
-- Числовые константы физики из исследования можно использовать как стартовые и тюнить.
+## Do not copy
+- the reference sim's assets, models, textures, mascot (crash-test dummy), icons, fonts, dialogue, UI text or names.
+  Similar style (daylight low-poly world, light cards), our own execution.
+- The Sendline brand in `sendline-main/brand/`. Do not copy `sendline-main/` code (D-005); write our own and use it
+  only as a reference for formulas and constants.
+- Physics constants from the research are fine as starting values to tune.
 
-## Порядок работы по этапу
-1. Перед началом: отметить этап в PLAN.md как `[~]`, перечитать его критерии готовности.
-2. Реализовать только то, что входит в этап. Всё, что выходит за рамки, записать в PLAN.md, а не делать.
-3. Значимые выборы сразу записывать в DECISIONS.md.
+## Working on a stage
+1. Before starting: mark the stage `[~]` in PLAN.md and reread its "done when" criteria.
+2. Build only what the stage covers. Write anything extra into PLAN.md instead of doing it.
+3. Log meaningful choices in DECISIONS.md as you make them.
 
-## После каждого этапа (обязательно)
-1. **Запустить:** `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`. Все должны пройти.
-2. **Проверить:** `npm run dev` и пройти каждый критерий готовности этапа из PLAN.md. Что проверено автотестом,
-   а что руками, указать в отчёте. Непроверенное честно назвать непроверенным.
-3. **Обновить:** в PLAN.md поставить `[x]`, дописать в DECISIONS.md решения этапа.
-4. **Закоммитить:** один коммит на этап, сообщение `stage N: краткое описание`. Без `--no-verify`.
-5. **Отчитаться и ждать:** коротко что сделано, как проверено, что осталось/риски. Следующий этап не начинать
-   без подтверждения пользователя.
+## After every stage (required)
+1. **Run:** `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`. All must pass.
+2. **Check:** run `npm run dev` and go through each "done when" criterion. In the report, say which were checked
+   by tests and which by hand. Say plainly what was not checked.
+3. **Update:** mark the stage `[x]` in PLAN.md, add the stage's decisions to DECISIONS.md.
+4. **Commit:** one commit per stage, message `stage N: short description`. No `--no-verify`.
+5. **Report and wait:** short summary of what was done, how it was checked, what is left or risky.
+   Do not start the next stage without the user's approval.

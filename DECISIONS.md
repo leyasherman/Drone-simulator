@@ -1,83 +1,89 @@
-# DECISIONS
+# Decisions
 
-Журнал решений по проекту. Каждое решение — отдельная запись, новые сверху.
-Записываю, когда выбираю между вариантами, отклоняюсь от исследования в `sendline-main/docs/` или от PLAN.md.
+One entry per decision, newest first. Add one when choosing between options, or when we move away from
+the research in `sendline-main/docs/` or from PLAN.md.
 
-## Шаблон записи
+## Template
 
 ```
-## D-NNN. Короткое название решения
-- Дата: ГГГГ-ММ-ДД
-- Этап: N
-- Статус: принято | заменено D-NNN | отменено
-- Контекст: какая проблема или выбор стоял.
-- Варианты: что рассматривал (кратко, плюсы и минусы).
-- Решение: что выбрал.
-- Почему: главные причины.
-- Последствия: что это меняет, чем рискуем, когда пересмотреть.
+## D-NNN. Short title
+- Date: YYYY-MM-DD
+- Stage: N
+- Status: accepted | replaced by D-NNN | cancelled
+- Context: what problem or choice we had.
+- Options: what we considered, with short pros and cons.
+- Decision: what we picked.
+- Why: the main reasons.
+- Consequences: what this changes, the risks, when to revisit.
 ```
 
 ---
 
-<!-- Записи ниже -->
+<!-- Entries below -->
 
-## D-006. Инструменты каркаса
-- Дата: 2026-10-04
-- Этап: 0
-- Статус: принято
-- Контекст: нужен минимальный, но строгий каркас.
-- Решение: Vite 8, TypeScript 6 (strict + noUncheckedIndexedAccess), Vitest 5 в node-окружении,
-  ESLint 10 (typescript-eslint) + Prettier, LF во всех файлах (.gitattributes). Два пакета рантайма: three, zod.
-- Почему: Vitest использует ту же конфигурацию Vite; node-окружение достаточно для sim/ и сборки сцены без WebGL.
-- Последствия: предупреждение Vite о чанке > 500 КБ — это three.js; разбивку чанков сделаем на этапе релиза.
+## D-007. Docs in English, chat in Russian
+- Date: 2026-10-04
+- Stage: 0
+- Status: accepted
+- Decision: everything written into the project (PLAN, DECISIONS, CLAUDE.md, notes, commits, code comments)
+  is in plain, short English. Conversation with the user stays in Russian.
+- Why: the user's request.
 
-## D-005. Объём: свободный полёт + уроки + редактор уроков; код пишем сами
-- Дата: 2026-10-04
-- Этап: 0
-- Статус: принято
-- Контекст: ответ заказчика: «build it independently», «free flight and lessons only», редактор уроков ценен,
-  ввод «keyboard and gamepad», строить фичу за фичей, начиная с фундамента.
-- Решение: свой код маленькими этапами; sendline только справка по формулам и константам.
-  Гонки, мультиплеер, чат, skill chain, повторы, магазин убраны из плана.
-- Почему: прямое пожелание заказчика; маленькие этапы дешевле откатывать.
-- Последствия: D-001 отменено; D-002 (Realtime) неактуально, пока мультиплеер вне объёма.
+## D-006. Scaffold tooling
+- Date: 2026-10-04
+- Stage: 0
+- Status: accepted
+- Decision: Vite 8, TypeScript 6 (strict + noUncheckedIndexedAccess), Vitest 5 in the node environment,
+  ESLint 10 (typescript-eslint) + Prettier, LF line endings (.gitattributes). Two runtime packages: three, zod.
+- Why: Vitest reuses the Vite config; node is enough to test `sim/` and build a scene without WebGL.
+- Consequences: Vite warns about a chunk over 500 KB. That is three.js; we split chunks at release.
 
-## D-004. Графика: SVG-заглушки до этапа 6
-- Дата: 2026-10-04
-- Этап: 0
-- Статус: принято
-- Контекст: маскот и иконки можно сгенерировать (GPT image) сразу или позже.
-- Варианты: генерировать сейчас (риск переделки, пока UI не устоялся) / заглушки и бриф позже.
-- Решение: простые SVG-заглушки; бриф для генерации готовим на этапе 7 (HUD и меню).
-- Почему: дешевле, UI ещё будет меняться.
-- Последствия: финальные рисунки появятся после утверждения макета этапа 6.
+## D-005. Scope: free flight + lessons + lesson editor; we write our own code
+- Date: 2026-10-04
+- Stage: 0
+- Status: accepted
+- Context: the client said "build it independently", "free flight and lessons only", the lesson editor is valuable,
+  input is "keyboard and gamepad", build feature by feature from the foundations.
+- Decision: our own code in small stages; sendline is only a reference for formulas and constants.
+  Races, multiplayer, chat, skill chain, replays and shop are removed from the plan.
+- Why: the client asked for it; small stages are cheap to roll back.
+- Consequences: cancels D-001; D-002 is on hold while multiplayer is out of scope.
 
-## D-003. Столкновения: свои OBB вместо Rapier
-- Дата: 2026-10-04
-- Этап: 0
-- Статус: принято
-- Контекст: мир строится из коробок; Rapier даёт 2+ МБ WASM.
-- Варианты: Rapier (готово, тяжело) / свои OBB + лучи (легко, детерминированно, больше своего кода).
-- Решение: свои OBB-коллайдеры и раскасты.
-- Почему: вес сборки, детерминизм, простота отладки; прототип sendline уже так делает.
-- Последствия: если понадобятся сложные формы (ragdoll, динамика), вернуться к Rapier.
+## D-004. Graphics: SVG placeholders until stage 7
+- Date: 2026-10-04
+- Stage: 0
+- Status: accepted
+- Context: the mascot and icons could be generated (GPT image) now or later.
+- Options: generate now (may need redoing while the UI changes) / placeholders now, brief later.
+- Decision: simple SVG placeholders; write the image brief at stage 7 (HUD and menus).
+- Why: cheaper, the UI will still change.
+- Consequences: final art arrives after the stage 7 layout is approved.
 
-## D-002. Мультиплеер и чат через Supabase Realtime
-- Дата: 2026-10-04
-- Этап: 0
-- Статус: принято
-- Контекст: в исследовании мультиплеер на Cloudflare Worker; заказчик хочет только Vercel + Supabase.
-- Варианты: Cloudflare Durable Objects / Supabase Realtime (presence + broadcast).
-- Решение: Supabase Realtime.
-- Почему: меньше сервисов, бесплатный тариф, модель «присутствия» с задержкой 3.5 с не требует своего сервера.
-- Последствия: лимиты бесплатного Realtime (соединения, сообщения) проверить на этапе 12.
+## D-003. Collisions: our own OBBs instead of Rapier
+- Date: 2026-10-04
+- Stage: 0
+- Status: accepted
+- Context: the world is made of boxes; Rapier adds 2+ MB of WASM.
+- Options: Rapier (ready-made, heavy) / our own OBBs and raycasts (light, deterministic, more code).
+- Decision: our own OBB colliders and raycasts.
+- Why: bundle size, determinism, easier debugging; the sendline prototype does the same.
+- Consequences: if we need complex shapes (ragdolls, dynamic objects), reconsider Rapier.
 
-## D-001. Переиспользуем MIT-код из sendline-main
-- Дата: 2026-10-04
-- Этап: 0
-- Статус: отменено D-005
-- Контекст: в папке лежит протестированный прототип (MIT, Pavel Nguyen): sim, input, audio, replay, миграции.
-- Варианты: писать с нуля / переносить с адаптацией.
-- Решение: переносить код (не бренд) с указанием авторства в шапке файлов и в README.
-- Почему: экономит этапы 1-2 и часть 4, код уже покрыт тестами.
-- Последствия: бренд Sendline (`sendline-main/brand/`) не используем; при переносе приводим к нашей структуре и Vitest.
+## D-002. Multiplayer and chat over Supabase Realtime
+- Date: 2026-10-04
+- Stage: 0
+- Status: on hold (multiplayer is out of scope, see D-005)
+- Context: the research uses a Cloudflare Worker; the client wants only Vercel + Supabase.
+- Options: Cloudflare Durable Objects / Supabase Realtime (presence + broadcast).
+- Decision: Supabase Realtime.
+- Why: fewer services, free tier, presence with a 3.5 s delay needs no custom server.
+- Consequences: check free Realtime limits (connections, messages) if multiplayer comes back.
+
+## D-001. Reuse MIT code from sendline-main
+- Date: 2026-10-04
+- Stage: 0
+- Status: cancelled by D-005
+- Context: the folder holds a tested MIT prototype (Pavel Nguyen): sim, input, audio, replay, migrations.
+- Options: write from scratch / port with changes.
+- Decision: port the code (not the brand) with credit in file headers and the README.
+- Why: saves stages 1-2 and part of 4; the code is already tested.

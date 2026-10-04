@@ -1,101 +1,107 @@
-# PLAN: браузерный FPV-симулятор (механика the reference sim)
+# Plan: browser FPV drone simulator
 
-Объём по ответу заказчика (2026-10-04): **свободный полёт + уроки + редактор уроков**. Ввод: **клавиатура и геймпад**
-(архитектура готова к настоящим пультам позже). Строим **независимо**, фича за фичей, сначала фундамент.
+Goal: copy the mechanics of the reference sim.
 
-Справка: `sendline-main/docs/research/` (формулы и константы), `docs/reference/observed-lessons.md` (что видно в оригинале).
-Графика похожая по стилю (дневной low-poly мир из коробок, светлые карточки UI), исполнение и тексты свои.
+Scope, agreed with the client on 2026-10-04: **free flight, lessons and a lesson editor**.
+Input: **keyboard and gamepad**. Design the input layer so real radios can be added later.
+Build it ourselves, one feature at a time, foundations first.
 
-Стек: TypeScript, Three.js, Vite, Vercel, Supabase. Бесплатные тарифы.
+References: `sendline-main/docs/research/` (formulas and constants), `docs/reference/observed-lessons.md`
+(what the original does). Graphics should look similar in style (daylight low-poly world made of boxes,
+light UI cards), but every asset and text is our own.
 
-Статусы: `[ ]` не начат, `[~]` в работе, `[x]` готов (критерии проверены, закоммичено).
-Правило: один этап за раз, после этапа отчёт и ожидание подтверждения.
+Stack: TypeScript, Three.js, Vite, Vercel, Supabase. Free tiers only.
 
----
-
-## Фундамент
-
-### Этап 0. Каркас `[x]`
-git init, Vite + TS strict + Three.js, Vitest, ESLint + Prettier, структура папок, сцена с кубом, `.env.example`.
-**Готово:** `npm run dev` показывает сцену; typecheck, lint, test, build проходят.
-
-### Этап 1. Часы и твёрдое тело `[ ]`
-Фиксированный шаг 1/240 с (макс. 16 шагов на кадр, сброс после паузы > 0.25 с), интерполяция, твёрдое тело
-(позиция, кватернион, скорости, инерция бокса), гравитация, приложение сил и моментов.
-**Готово:** тесты: свободное падение с 5 м даёт ~8.2 м/с у земли; одинаковый результат при кадрах 1/15, 1/30, 1/60, 1/144;
-два прогона побитово равны.
-
-### Этап 2. Модель полёта `[ ]`
-Профиль Freestyle 5", моторы с задержкой, тяга, микшер Quad-X с airmode, rate-контроллер (P, I, D, FF),
-Betaflight Actual rates + кривая газа, устойчивый drag. Остальные эффекты (prop wash, ground effect, батарея) позже.
-**Готово:** тесты: висение на газе ~38-40% без дрейфа 10 с; полный крен ~800°/с, 63% за ~40 мс;
-макс. скорость нос вниз 60° около 100 км/ч.
-
-### Этап 3. Ввод `[ ]`
-Единый слой «стики» (throttle, roll, pitch, yaw, кнопки) с источниками: клавиатура и геймпад (Mode 2, deadband).
-Арминг при газе ≤15%. Мягкий режим клавиатуры для новичков. Интерфейс источника готов для пульта (калибровка позже).
-**Готово:** отладочные полоски каналов реагируют на клавиатуру и геймпад; арминг с поднятым газом отклоняется с сообщением;
-тесты нормализации и deadband проходят.
-
-### Этап 4. Полёт в 3D `[ ]`
-Своя low-poly модель дрона, FPV-камера (FOV 100°, uptilt 30°), chase-камера, тестовое поле (сетка, небо, облака, свет).
-**Готово:** с клавиатуры и геймпада можно взлететь, полетать, сесть; стабильные 60 fps; переключение камер работает.
-
-### Этап 5. Столкновения и респавн `[ ]`
-Мир из коробок (OBB), столкновения с CCD, раскаст вниз, состояния на земле (стоит / опрокинут / перевёрнут),
-лёгкий удар, крах, респавн по R, авто-респавн перевёрнутым.
-**Готово:** тесты: на 30 м/с нет пролёта сквозь стенку 10 см; дрон спокойно стоит на земле без дрожи;
-в браузере перевёрнутый дрон предлагает респавн и респавнится сам.
-
-## Свободный полёт
-
-### Этап 6. Карта `[ ]`
-Генератор мира из коробок: площадка для уроков (трек, сетка), город (дороги, башни, ветряки, краны), границы карты.
-**Готово:** карта ~400×400 м; 60 fps на средней машине; вылет за границы возвращает на спавн.
-
-### Этап 7. HUD, меню, настройки `[ ]`
-Дизайн-токены, HUD (скорость, высота, горизонт), пауза (Продолжить, Респавн, Настройки, Главное меню),
-настройки (управление, rates-пресеты, FOV/uptilt, графика), главное меню (Свободный полёт, Лётная школа).
-SVG-заглушки маскота.
-**Готово:** путь «меню → полёт → пауза → настройки → назад» проходится мышью и клавиатурой; настройки переживают перезагрузку.
-
-## Уроки
-
-### Этап 8. Запись и проигрывание полётов `[ ]`
-Recorder поз и стиков 60 Гц, плеер с интерполяцией (lerp/slerp), сериализация.
-**Готово:** тесты: интерполяция в пределах 1 мм от исходной траектории; в браузере записанный полёт
-проигрывается с FPV-камерой и живыми стиками на оверлее.
-
-### Этап 9. Движок урока `[ ]`
-Формат урока (Zod), шаги (реплики + демо + камера), практика (ворота, посадка), проверка пролёта ворот и посадки,
-UI урока (плашка шага, маскот-пузырь, контур пульта, «+XP» за ворота), экран завершения. Уроки из `content/lessons/`.
-**Готово:** первый урок (взлёт) проходится от начала до экрана завершения; тесты пролёта ворот и посадки проходят.
-
-### Этап 10. Экран уроков и курсы `[ ]`
-Экран со вкладками курсов, сетка карточек, панель урока, локальный прогресс. Курс 1 (7 уроков) своими текстами.
-**Готово:** все 7 уроков курса 1 проходятся; прогресс виден и переживает перезагрузку.
-
-### Этап 11. Редактор уроков `[ ]`
-Внутриигровой редактор: шаги, реплики, запись демо-полёта, расстановка ворот и площадок (гизмо, привязка к сетке),
-предпросмотр, экспорт/импорт JSON.
-**Готово:** новый урок создаётся в редакторе без кода и сразу проходится игроком.
-
-## Данные и релиз
-
-### Этап 12. Supabase `[ ]`
-Анонимный вход, ник, профиль (XP, уровень, прогресс уроков), уроки в БД, сохранение из редактора (роль автора), RLS.
-**Готово:** прогресс переживает смену браузера после входа по email; игрок не может менять уроки и XP напрямую.
-
-### Этап 13. Звук, полировка, деплой `[ ]`
-Звук моторов из RPM, эффекты камеры, качество Low/Medium/High, второй курс уроков, деплой на Vercel.
-**Готово:** прод-URL проходит путь от входа до завершения урока и свободного полёта.
+Status: `[ ]` not started, `[~]` in progress, `[x]` done (criteria checked, committed).
+Rule: one stage at a time. After each stage, report and wait for approval.
 
 ---
 
-## Вне объёма (по ответу заказчика)
-Гонки, мультиплеер, чат, skill chain, редактор повторов, магазин, другие дроны, калибровка настоящих пультов
-(архитектура под неё есть, реализация позже).
+## Foundations
 
-## Открытые вопросы
-- Что именно заказчик имеет в виду под «lessons are inside like the editor» (влияет на этап 11).
-- Что происходит при падении/промахе в практике урока в оригинале.
+### Stage 0. Scaffold `[x]`
+git init, Vite + strict TS + Three.js, Vitest, ESLint + Prettier, folder layout, a scene with a cube, `.env.example`.
+**Done when:** `npm run dev` shows the scene; typecheck, lint, test and build pass.
+
+### Stage 1. Clock and rigid body `[ ]`
+Fixed 1/240 s step (max 16 steps per frame, reset after a gap over 0.25 s), interpolation for rendering,
+rigid body (position, quaternion, velocities, box inertia), gravity, applying forces and torques.
+**Done when:** tests pass: a drop from 5 m hits the ground at ~8.2 m/s; frame times of 1/15, 1/30, 1/60 and
+1/144 s give the same result; two runs are bit-for-bit equal.
+
+### Stage 2. Flight model `[ ]`
+Freestyle 5" profile, motor lag, thrust, Quad-X mixer with airmode, rate controller (P, I, D, FF),
+Betaflight Actual rates and throttle curve, stable drag. Prop wash, ground effect and battery sag come later.
+**Done when:** tests pass: hover at ~38-40% throttle with no drift for 10 s; full roll stick gives ~800°/s and
+reaches 63% in ~40 ms; top speed nose-down at 60° is about 100 km/h.
+
+### Stage 3. Input `[ ]`
+One "sticks" layer (throttle, roll, pitch, yaw, buttons) fed by keyboard and gamepad (Mode 2, deadband).
+Arm only with throttle at or below 15%. A gentler keyboard mode for beginners. The source interface is ready
+for radios (calibration later).
+**Done when:** debug channel bars react to keyboard and gamepad; arming with throttle up is refused with a message;
+tests for axis normalisation and deadband pass.
+
+### Stage 4. Flying in 3D `[ ]`
+Our own low-poly drone model, FPV camera (FOV 100°, uptilt 30°), chase camera, test field (grid, sky, clouds, light).
+**Done when:** you can take off, fly and land with keyboard and gamepad; steady 60 fps; camera switching works.
+
+### Stage 5. Collisions and respawn `[ ]`
+World made of boxes (OBB), collisions with continuous detection, a downward raycast, ground states
+(upright / tipped / upside down), light hits, crashes, respawn on R, a respawn prompt when upside down.
+**Done when:** tests pass: at 30 m/s the drone does not pass through a 10 cm wall; it rests on the ground
+without jitter; in the browser an upside-down drone shows the respawn prompt.
+
+## Free flight
+
+### Stage 6. Map `[ ]`
+Box-based world generator: lesson area (track, grid), city (roads, towers, wind turbines, cranes), map borders.
+**Done when:** map is ~400×400 m; 60 fps on a mid-range machine; leaving the borders returns you to spawn.
+
+### Stage 7. HUD, menus, settings `[ ]`
+Design tokens, HUD (speed, altitude, horizon), pause menu (Resume, Respawn, Settings, Main menu),
+settings (controls, rate presets, FOV/uptilt, graphics), main menu (Free flight, Flight school).
+SVG placeholder mascot.
+**Done when:** "menu → fly → pause → settings → back" works with mouse and keyboard; settings survive a reload.
+
+## Lessons
+
+### Stage 8. Recording and playing back flights `[ ]`
+Recorder for poses and sticks at 60 Hz, player with interpolation (lerp/slerp), serialisation.
+**Done when:** tests pass: playback stays within 1 mm of the original path; in the browser a recorded flight
+plays with the FPV camera and live sticks on the overlay.
+
+### Stage 9. Lesson engine `[ ]`
+Lesson format (Zod), steps (instructor lines + demo + camera), practice (gates, landing pads), gate and landing
+checks, lesson UI (step badge, mascot speech bubble, radio outline, "+XP" per gate), completion screen.
+Lessons load from `content/lessons/`.
+**Done when:** lesson 1 (takeoff) runs from start to the completion screen; gate and landing tests pass.
+
+### Stage 10. Lesson list and courses `[ ]`
+Screen with course tabs, lesson cards, lesson panel, local progress. Course 1 (7 lessons) with our own texts.
+**Done when:** all 7 lessons of course 1 can be completed; progress shows and survives a reload.
+
+### Stage 11. Lesson editor `[ ]`
+In-game editor: steps, instructor lines, recording the demo flight, placing gates and pads (gizmo, grid snap),
+preview, JSON export/import.
+**Done when:** a new lesson is made in the editor without code and a player can fly it straight away.
+
+## Data and release
+
+### Stage 12. Supabase `[ ]`
+Anonymous sign-in, nickname, profile (XP, level, lesson progress), lessons in the database, saving from the editor
+(author role), RLS.
+**Done when:** progress carries over to another browser after email sign-in; players cannot change lessons or XP directly.
+
+### Stage 13. Sound, polish, deploy `[ ]`
+Motor sound from RPM, camera effects, Low/Medium/High quality, course 2, deploy to Vercel.
+**Done when:** the production URL works from first visit through a finished lesson and free flight.
+
+---
+
+## Out of scope (client's answer)
+Races, multiplayer, chat, skill chain, replay editor, shop, other drones, real radio calibration
+(the architecture allows it, built later).
+
+## Open questions
+- What exactly the client means by "the lessons are inside like the editor" (affects stage 11).
