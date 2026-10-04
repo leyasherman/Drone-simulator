@@ -3,7 +3,7 @@ import { toggleArm } from '../src/input/arming';
 import { applyDeadband, normalizeAxis } from '../src/input/axis';
 import { DEFAULT_GAMEPAD_OPTIONS, mapStandardGamepad, type PadState } from '../src/input/gamepad';
 import { InputManager } from '../src/input/input';
-import { KEYBOARD_NORMAL, KeyboardInput } from '../src/input/keyboard';
+import { KEYBOARD_GENTLE, KEYBOARD_NORMAL, KeyboardInput } from '../src/input/keyboard';
 import { emptyActions, type Sticks } from '../src/input/types';
 
 const sticks = (): Sticks => ({ throttle: 0, roll: 0, pitch: 0, yaw: 0 });
@@ -96,7 +96,8 @@ describe('KeyboardInput', () => {
   });
 
   it('gentle mode deflects less', () => {
-    const k = new KeyboardInput(); // gentle by default
+    const k = new KeyboardInput();
+    k.feel = KEYBOARD_GENTLE;
     k.keyDown('ArrowLeft');
     expect(step(k, 1).roll).toBeCloseTo(-0.3);
   });

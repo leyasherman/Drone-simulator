@@ -31,7 +31,8 @@ the research in `sendline-main/docs/` or from PLAN.md.
   from browser wiring, so it is unit-tested.
 - Keyboard: W/S throttle (holds when released), A/D yaw, arrows pitch/roll, Space arm, R respawn, C camera, Esc pause.
   Two feels: normal (research values: ±60%, ramp 4/s out, 6/s back, throttle 90%/s) and gentle
-  (±30% tilt, ±40% yaw, 2/s out, throttle 50%/s). Gentle is the default, because lesson 2 is hard on a keyboard.
+  (±30% tilt, ±40% yaw, 2/s out, throttle 50%/s). Normal is the default: the user found the original sharper
+  than gentle and wants it to match. Gentle stays as a setting for beginners.
 - Gamepad (standard mapping, Mode 2): left stick throttle + yaw, right stick pitch + roll; deadband 5%.
   Throttle mode 'centerZero' (research default) or 'fullRange'. Buttons: A arm, B respawn, Y camera, Start pause.
 - Arming: only at throttle ≤ 15%; disarming always allowed; on a blocked arm the screen says why.

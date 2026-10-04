@@ -60,7 +60,7 @@ function ramp(current: number, target: number, rateOut: number, rateBack: number
 export class KeyboardInput implements InputSource {
   readonly kind = 'keyboard';
   readonly label = 'Keyboard';
-  feel: KeyboardFeel = KEYBOARD_GENTLE;
+  feel: KeyboardFeel = KEYBOARD_NORMAL;
 
   private readonly down = new Set<string>();
   private readonly pressed = new Set<string>(); // went down since the last update
