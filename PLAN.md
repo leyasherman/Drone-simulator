@@ -15,7 +15,7 @@
 
 ## Фундамент
 
-### Этап 0. Каркас `[ ]`
+### Этап 0. Каркас `[x]`
 git init, Vite + TS strict + Three.js, Vitest, ESLint + Prettier, структура папок, сцена с кубом, `.env.example`.
 **Готово:** `npm run dev` показывает сцену; typecheck, lint, test, build проходят.
 
