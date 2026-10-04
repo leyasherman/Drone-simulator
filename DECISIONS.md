@@ -21,6 +21,22 @@ the research in `sendline-main/docs/` or from PLAN.md.
 
 <!-- Entries below -->
 
+## D-010. Rate controller
+- Date: 2026-10-05
+- Stage: 2b
+- Status: accepted
+- Decision: acro-mode rate controller. Per axis: torque = inertia × (P + I + D + FF), with P = error / 20 ms,
+  D on the filtered gyro derivative (80 Hz), FF on the smoothed setpoint change and never past P,
+  I with leak (1.75 s), deadband (1.5°/s), I-term relax (only below 200°/s and within 30°/s) and a cap.
+  Torque is clamped to half of full thrust across the arm, then divided by the current authority
+  (thrust slope 2·mean motor, floored at 0.2) to get mixer commands. Betaflight Actual rates; three presets.
+  A Drone class wires controller → motors → body in one 240 Hz step.
+- Why: scaling by inertia keeps the same gains working for any drone size; values match the research.
+- Left out for now: the mixer-saturation check for anti-windup (the cap and relax cover the common cases).
+  Add it if pilots report bounce-back after flips.
+- Measured: full roll 808°/s (peak 812), 63% in 41.7 ms; 20% yaw 36.2°/s against 35.35 target;
+  10 s hover level with under 5 cm drift.
+
 ## D-009. Motor and thrust model
 - Date: 2026-10-04
 - Stage: 2a

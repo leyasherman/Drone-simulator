@@ -36,7 +36,7 @@ yaw reaction torque, stable drag. No controller yet: mixer commands drive the mo
 motor reaches 63% of a step in its time constant; mixer commands turn the drone the right way on each axis;
 top speed nose-down at 60° with full throttle is about 100 km/h.
 
-### Stage 2b. Rate controller and rates `[ ]`
+### Stage 2b. Rate controller and rates `[x]`
 Rate controller (P, I, D, FF, anti-windup), Betaflight Actual rates, rate presets.
 **Done when:** tests pass: full roll stick gives ~800°/s and reaches 63% in ~40 ms; 20% yaw stick tracks its target;
 hover for 10 s with sticks centred stays level with no drift.
