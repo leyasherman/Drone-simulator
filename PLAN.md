@@ -23,10 +23,10 @@ Rule: one stage at a time. After each stage, report and wait for approval.
 git init, Vite + strict TS + Three.js, Vitest, ESLint + Prettier, folder layout, a scene with a cube, `.env.example`.
 **Done when:** `npm run dev` shows the scene; typecheck, lint, test and build pass.
 
-### Stage 1. Clock and rigid body `[ ]`
+### Stage 1. Clock and rigid body `[x]`
 Fixed 1/240 s step (max 16 steps per frame, reset after a gap over 0.25 s), interpolation for rendering,
 rigid body (position, quaternion, velocities, box inertia), gravity, applying forces and torques.
-**Done when:** tests pass: a drop from 5 m hits the ground at ~8.2 m/s; frame times of 1/15, 1/30, 1/60 and
+**Done when:** tests pass: a drop from 5 m hits the ground at √(2gh) ≈ 9.90 m/s (no drag yet); frame times of 1/15, 1/30, 1/60 and
 1/144 s give the same result; two runs are bit-for-bit equal.
 
 ### Stage 2. Flight model `[ ]`

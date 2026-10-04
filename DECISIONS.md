@@ -21,6 +21,18 @@ the research in `sendline-main/docs/` or from PLAN.md.
 
 <!-- Entries below -->
 
+## D-008. Rigid body design
+- Date: 2026-10-04
+- Stage: 1
+- Status: accepted
+- Decision: semi-implicit Euler at 240 Hz; angular velocity stored in the body frame (like a gyro);
+  Euler's equations with the gyroscopic term; quaternion integrated and normalised each step;
+  forces and torques accumulated, then cleared after each step; Three.js Vector3/Quaternion as maths types;
+  scratch objects at module level so step() never allocates.
+- Why: simple, stable at this step size, deterministic; the body-frame rate is what the rate controller needs.
+- Consequences: the drop-test target changes from 8.2 m/s (research value, includes drag) to 9.90 m/s
+  (no drag yet). The 8.2 m/s check returns with drag in stage 2.
+
 ## D-007. Docs in English, chat in Russian
 - Date: 2026-10-04
 - Stage: 0
