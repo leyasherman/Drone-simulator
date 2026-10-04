@@ -35,6 +35,8 @@ const input = new InputManager();
 input.keyboard.attach(window);
 const flight = new FreeFlight(FREESTYLE_5, input);
 const panel = new DebugPanel(document.body);
+// Dev only: lets browser scripts (scripts/smoke.mjs) read the sim state
+if (import.meta.env.DEV) Object.assign(window, { __sim: { flight, input, view } });
 
 // Debug-only toggles: G keyboard feel, T gamepad throttle mode
 window.addEventListener('keydown', (e) => {
