@@ -29,11 +29,17 @@ rigid body (position, quaternion, velocities, box inertia), gravity, applying fo
 **Done when:** tests pass: a drop from 5 m hits the ground at √(2gh) ≈ 9.90 m/s (no drag yet); frame times of 1/15, 1/30, 1/60 and
 1/144 s give the same result; two runs are bit-for-bit equal.
 
-### Stage 2. Flight model `[ ]`
-Freestyle 5" profile, motor lag, thrust, Quad-X mixer with airmode, rate controller (P, I, D, FF),
-Betaflight Actual rates and throttle curve, stable drag. Prop wash, ground effect and battery sag come later.
-**Done when:** tests pass: hover at ~38-40% throttle with no drift for 10 s; full roll stick gives ~800°/s and
-reaches 63% in ~40 ms; top speed nose-down at 60° is about 100 km/h.
+### Stage 2a. Motors, thrust, mixer, drag `[x]`
+Freestyle 5" profile, throttle curve, Quad-X mixer with airmode, motor lag, thrust with inflow loss,
+yaw reaction torque, stable drag. No controller yet: mixer commands drive the motors directly.
+**Done when:** tests pass: hover at ~38-40% throttle stick; unpowered drop from 5 m hits at ~8.2 m/s (with drag);
+motor reaches 63% of a step in its time constant; mixer commands turn the drone the right way on each axis;
+top speed nose-down at 60° with full throttle is about 100 km/h.
+
+### Stage 2b. Rate controller and rates `[ ]`
+Rate controller (P, I, D, FF, anti-windup), Betaflight Actual rates, rate presets.
+**Done when:** tests pass: full roll stick gives ~800°/s and reaches 63% in ~40 ms; 20% yaw stick tracks its target;
+hover for 10 s with sticks centred stays level with no drift.
 
 ### Stage 3. Input `[ ]`
 One "sticks" layer (throttle, roll, pitch, yaw, buttons) fed by keyboard and gamepad (Mode 2, deadband).

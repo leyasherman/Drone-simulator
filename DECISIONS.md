@@ -21,6 +21,20 @@ the research in `sendline-main/docs/` or from PLAN.md.
 
 <!-- Entries below -->
 
+## D-009. Motor and thrust model
+- Date: 2026-10-04
+- Stage: 2a
+- Status: accepted
+- Context: without inflow loss, top speed came out at 122 km/h against ~104 in the research.
+- Options: raise drag to fit / add inflow loss (thrust drops when air already flows through the prop).
+- Decision: add inflow loss now, per prop, including the rotation at each prop. Keep drag at the research values.
+- Also: Quad-X mixer with our own airmode version (shrink corrections over the full range, then shift throttle
+  to keep all motors in 0..1); first-order motor lag, 0.65× faster when braking; thrust ∝ command²;
+  yaw from rotor reaction torque; implicit quadratic drag (1× forward, 1.15× sideways, 4× vertical, plus rotor drag).
+- Why: inflow is part of how a prop makes thrust, not a separate effect; fitting drag would break the drop test.
+- Measured: hover 38.8% stick, unpowered 5 m drop 8.23 m/s, top speed nose-down 60° 109 km/h.
+- Consequences: prop wash, ground effect and battery sag are still missing; top speed may drop a little when added.
+
 ## D-008. Rigid body design
 - Date: 2026-10-04
 - Stage: 1
