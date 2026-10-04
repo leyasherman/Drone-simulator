@@ -41,7 +41,7 @@ Rate controller (P, I, D, FF, anti-windup), Betaflight Actual rates, rate preset
 **Done when:** tests pass: full roll stick gives ~800°/s and reaches 63% in ~40 ms; 20% yaw stick tracks its target;
 hover for 10 s with sticks centred stays level with no drift.
 
-### Stage 3. Input `[ ]`
+### Stage 3. Input `[~]`
 One "sticks" layer (throttle, roll, pitch, yaw, buttons) fed by keyboard and gamepad (Mode 2, deadband).
 Arm only with throttle at or below 15%. A gentler keyboard mode for beginners. The source interface is ready
 for radios (calibration later).

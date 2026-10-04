@@ -21,6 +21,22 @@ the research in `sendline-main/docs/` or from PLAN.md.
 
 <!-- Entries below -->
 
+## D-011. Input layer
+- Date: 2026-10-05
+- Stage: 3
+- Status: accepted
+- Decision: every device is an InputSource that writes the same Sticks and one-shot Actions.
+  InputManager drives the game from whichever source was touched last; gamepads are polled every frame.
+  Pure logic (deadband, axis normalisation, Mode 2 mapping, keyboard ramps, arming rule) is separate
+  from browser wiring, so it is unit-tested.
+- Keyboard: W/S throttle (holds when released), A/D yaw, arrows pitch/roll, Space arm, R respawn, C camera, Esc pause.
+  Two feels: normal (research values: ±60%, ramp 4/s out, 6/s back, throttle 90%/s) and gentle
+  (±30% tilt, ±40% yaw, 2/s out, throttle 50%/s). Gentle is the default, because lesson 2 is hard on a keyboard.
+- Gamepad (standard mapping, Mode 2): left stick throttle + yaw, right stick pitch + roll; deadband 5%.
+  Throttle mode 'centerZero' (research default) or 'fullRange'. Buttons: A arm, B respawn, Y camera, Start pause.
+- Arming: only at throttle ≤ 15%; disarming always allowed; on a blocked arm the screen says why.
+- Not done yet: radios (non-standard mapping, calibration wizard). The InputSource interface is ready for them.
+
 ## D-010. Rate controller
 - Date: 2026-10-05
 - Stage: 2b
