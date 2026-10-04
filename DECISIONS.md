@@ -21,6 +21,22 @@ the research in `sendline-main/docs/` or from PLAN.md.
 
 <!-- Entries below -->
 
+## D-012. First 3D flight setup
+- Date: 2026-10-05
+- Stage: 4
+- Status: accepted
+- Temporary ground: a flat plane at y = 0, contact on the 8 corners of the body box, with heavy friction
+  and spin damping. Enough to take off and land. Stage 5 replaces it with real box collisions.
+- FPV view: one camera with render layers instead of a second props-only camera. Layer 1 (drone body) is hidden
+  in FPV, layer 2 (props) is shown in both views, so props appear at the bottom of the FPV view as on a real quad.
+  Near plane 1 cm. Revisit if props clip.
+- Camera: FPV at the frame's camera mount, FOV 100° vertical, uptilt 30°. Chase camera 1.6 m behind and
+  0.6 m above along the heading, smoothed. C toggles;  starts in chase (debug).
+- Sky: a large sphere with a vertex-colour gradient, so it tilts with the horizon (a screen-space background would not).
+- Spawn at the centre of a 5 m grid tile: a grid line right under the FPV camera showed as a thick dark stripe.
+- FreeFlight (game/) owns drone, input, clock and ground and knows nothing about rendering, so takeoff and
+  landing are covered by tests.
+
 ## D-011. Input layer
 - Date: 2026-10-05
 - Stage: 3

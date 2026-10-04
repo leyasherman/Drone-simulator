@@ -1,31 +1,40 @@
 import * as THREE from 'three';
-import { toggleArm } from './input/arming';
+import { FreeFlight } from './game/free-flight';
 import { InputManager } from './input/input';
 import { KEYBOARD_GENTLE, KEYBOARD_NORMAL } from './input/keyboard';
-import { createScene } from './render/scene';
+import { FlightCamera } from './render/cameras';
+import { FREESTYLE_5 } from './sim/profiles';
 import { DebugPanel } from './ui/debug-panel';
+import { DroneModel } from './world/drone-model';
+import { createTestField } from './world/test-field';
 
 const canvas = document.querySelector<HTMLCanvasElement>('#scene');
 if (!canvas) throw new Error('Canvas #scene not found');
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
-const { scene, camera, cube } = createScene(window.innerWidth / window.innerHeight);
+const field = createTestField();
+const view = new FlightCamera(window.innerWidth / window.innerHeight);
+const model = new DroneModel(FREESTYLE_5);
+// Debug: ?cam=chase starts in the chase view
+if (new URLSearchParams(location.search).get('cam') === 'chase') view.toggle();
+field.scene.add(model.root);
 
 function resize(): void {
   renderer.setSize(window.innerWidth, window.innerHeight, false);
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
+  view.setAspect(window.innerWidth / window.innerHeight);
 }
 window.addEventListener('resize', resize);
 resize();
 
-// Input test bench (stage 3): channel bars, arming, source switching
 const input = new InputManager();
 input.keyboard.attach(window);
+const flight = new FreeFlight(FREESTYLE_5, input);
 const panel = new DebugPanel(document.body);
-let armed = false;
 
 // Debug-only toggles: G keyboard feel, T gamepad throttle mode
 window.addEventListener('keydown', (e) => {
@@ -38,44 +47,44 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
+const renderPos = new THREE.Vector3();
+const renderRot = new THREE.Quaternion();
 let last = performance.now();
+let fps = 60;
+
 renderer.setAnimationLoop((now) => {
-  const dt = Math.min(0.1, (now - last) / 1000);
+  const frameSeconds = (now - last) / 1000;
   last = now;
-  input.update(dt);
+  fps += (1 / Math.max(frameSeconds, 1e-3) - fps) * 0.05;
 
-  const a = input.actions;
-  if (a.armToggle) {
-    const result = toggleArm(armed, input.sticks.throttle);
-    if (result === 'blocked-throttle') panel.flash('Arming blocked: lower the throttle first', now);
-    else armed = result === 'armed';
-  }
-  if (a.respawn) panel.flash('Respawn', now, 800);
-  if (a.camera) panel.flash('Camera', now, 800);
-  if (a.pause) panel.flash('Pause', now, 800);
+  const e = flight.frame(frameSeconds);
+  if (e.armBlocked) panel.flash('Arming blocked: lower the throttle first', now);
+  if (e.cameraToggle) view.toggle();
+  if (e.pause) panel.flash('Pause comes in stage 7', now, 1000);
 
-  // Cube mirrors the sticks so the axes are easy to read
-  const s = input.sticks;
-  cube.rotation.set(-s.pitch * 0.6, cube.rotation.y - s.yaw * dt * 3, -s.roll * 0.6);
-  cube.position.y = 0.5 + s.throttle * 2;
+  const body = flight.drone.body;
+  body.interpolate(flight.alpha, renderPos, renderRot);
+  model.root.position.copy(renderPos);
+  model.root.quaternion.copy(renderRot);
+  model.update(flight.drone.quad.motors, Math.min(frameSeconds, 0.1));
+  view.update(renderPos, renderRot, Math.min(frameSeconds, 0.1));
+  field.follow(renderPos);
 
-  const gamepadLine = input.gamepad.connected
-    ? `gamepad throttle: ${input.gamepad.options.throttleMode} (T)`
-    : 'gamepad: press a button to connect';
   panel.render(
     {
-      sticks: s,
+      sticks: input.sticks,
       source: `Input: ${input.active.label}`,
-      armed,
+      armed: flight.drone.armed,
       lines: [
-        `keyboard feel: ${input.keyboard.feel === KEYBOARD_GENTLE ? 'gentle' : 'normal'} (G)`,
-        gamepadLine,
-        'W/S throttle · A/D yaw · arrows pitch/roll',
-        'Space arm · R respawn · C camera · Esc pause',
-        'Pad: A arm · B respawn · Y camera · Start pause',
+        `speed ${flight.speedKmh.toFixed(0)} km/h · alt ${flight.altitude.toFixed(1)} m · ${fps.toFixed(0)} fps`,
+        `camera: ${view.mode} (C) · keyboard: ${input.keyboard.feel === KEYBOARD_GENTLE ? 'gentle' : 'normal'} (G)`,
+        input.gamepad.connected
+          ? `gamepad throttle: ${input.gamepad.options.throttleMode} (T)`
+          : 'gamepad: press a button to connect',
+        'Space arm · W/S throttle · A/D yaw · arrows pitch/roll · R respawn',
       ],
     },
     now,
   );
-  renderer.render(scene, camera);
+  renderer.render(field.scene, view.camera);
 });

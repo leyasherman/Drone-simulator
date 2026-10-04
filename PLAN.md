@@ -48,7 +48,7 @@ for radios (calibration later).
 **Done when:** debug channel bars react to keyboard and gamepad; arming with throttle up is refused with a message;
 tests for axis normalisation and deadband pass.
 
-### Stage 4. Flying in 3D `[ ]`
+### Stage 4. Flying in 3D `[~]`
 Our own low-poly drone model, FPV camera (FOV 100°, uptilt 30°), chase camera, test field (grid, sky, clouds, light).
 **Done when:** you can take off, fly and land with keyboard and gamepad; steady 60 fps; camera switching works.
 
