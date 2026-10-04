@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { FreeFlight } from './game/free-flight';
+import { ARM_THROTTLE_LIMIT } from './input/arming';
 import { InputManager } from './input/input';
 import { KEYBOARD_GENTLE, KEYBOARD_NORMAL } from './input/keyboard';
 import { FlightCamera } from './render/cameras';
@@ -72,8 +73,18 @@ renderer.setAnimationLoop((now) => {
   view.update(renderPos, renderRot, Math.min(frameSeconds, 0.1));
   field.follow(renderPos);
 
+  const pad = input.active.kind === 'gamepad';
+  let hint = '';
+  if (!flight.drone.armed) {
+    hint =
+      input.sticks.throttle > ARM_THROTTLE_LIMIT
+        ? `Lower the throttle (${pad ? 'left stick down' : 'S'}) to arm`
+        : `Press ${pad ? 'A' : 'Space'} to arm, then raise the throttle (${pad ? 'left stick' : 'hold W'})`;
+  }
+
   panel.render(
     {
+      hint,
       sticks: input.sticks,
       source: `Input: ${input.active.label}`,
       armed: flight.drone.armed,

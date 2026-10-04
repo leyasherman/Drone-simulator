@@ -6,6 +6,8 @@ export interface DebugInfo {
   source: string;
   armed: boolean;
   lines: string[];
+  /** Persistent prompt in the middle of the screen (e.g. how to arm). Empty hides it. */
+  hint: string;
 }
 
 const CHANNELS = [
@@ -24,6 +26,7 @@ export class DebugPanel {
   private readonly armed = document.createElement('div');
   private readonly info = document.createElement('div');
   private readonly toast = document.createElement('div');
+  private readonly hint = document.createElement('div');
   private toastUntil = 0;
 
   constructor(parent: HTMLElement) {
@@ -52,7 +55,9 @@ export class DebugPanel {
     this.root.append(this.info);
     this.toast.className = 'debug-toast';
     this.toast.hidden = true;
-    parent.append(this.root, this.toast);
+    this.hint.className = 'debug-toast debug-hint';
+    this.hint.hidden = true;
+    parent.append(this.root, this.toast, this.hint);
   }
 
   /** Shows a short message in the middle of the screen. */
@@ -81,5 +86,8 @@ export class DebugPanel {
     });
     this.info.innerHTML = d.lines.map((l) => `<div>${l}</div>`).join('');
     if (!this.toast.hidden && now > this.toastUntil) this.toast.hidden = true;
+    // A flash message takes the hint's place while it shows
+    this.hint.textContent = d.hint;
+    this.hint.hidden = !d.hint || !this.toast.hidden;
   }
 }

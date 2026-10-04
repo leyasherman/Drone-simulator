@@ -89,3 +89,10 @@
     sans-serif;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
 }
+
+.debug-hint {
+  top: auto;
+  bottom: 18%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.92);
+}
