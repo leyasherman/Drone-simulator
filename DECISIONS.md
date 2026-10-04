@@ -31,7 +31,7 @@ the research in `sendline-main/docs/` or from PLAN.md.
   in FPV, layer 2 (props) is shown in both views, so props appear at the bottom of the FPV view as on a real quad.
   Near plane 1 cm. Revisit if props clip.
 - Camera: FPV at the frame's camera mount, FOV 100° vertical, uptilt 30°. Chase camera 1.6 m behind and
-  0.6 m above along the heading, smoothed. C toggles;  starts in chase (debug).
+  0.6 m above along the heading, smoothed. C toggles; `?cam=chase` starts in chase (debug).
 - Sky: a large sphere with a vertex-colour gradient, so it tilts with the horizon (a screen-space background would not).
 - Spawn at the centre of a 5 m grid tile: a grid line right under the FPV camera showed as a thick dark stripe.
 - FreeFlight (game/) owns drone, input, clock and ground and knows nothing about rendering, so takeoff and
