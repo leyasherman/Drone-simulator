@@ -91,7 +91,7 @@ Gate crossing and landing checks, a lesson runner (briefing → practice → com
 inside the opening, fast segments); landing (after being airborne, inside the radius, upright, slow for 0.6 s);
 the runner walks lines and steps, counts gates in order, gives +10 XP per gate and completes.
 
-### Stage 9b. Lesson UI and lesson 1 `[ ]`
+### Stage 9b. Lesson UI and lesson 1 `[x]`
 Lesson UI (step badge, instructor bubble with a placeholder mascot, radio overlay, "+XP" per gate, gate and pad
 visuals, completion screen). Lesson 1 (takeoff) with our own texts and demo flights.
 **Done when:** lesson 1 runs from start to the completion screen in the browser.

@@ -8,6 +8,8 @@ import { Drone } from '../sim/drone';
 import type { DroneProfile } from '../sim/profiles';
 import type { Recorder } from '../sim/recording';
 
+const UP = new Vector3(0, 1, 0);
+
 /** Impact speeds into a surface, m/s. Values from the research prototype; tune by feel. */
 export const IMPACT_LIGHT = 0.5;
 export const IMPACT_HARD = 3;
@@ -52,6 +54,8 @@ export class FreeFlight {
   flightTime = 0;
   /** When set, every physics step is recorded into it. */
   recorder: Recorder | null = null;
+  /** Called after every physics step (lessons check gates and landing here). */
+  afterStep: ((dt: number) => void) | null = null;
 
   constructor(
     profile: DroneProfile,
@@ -63,6 +67,12 @@ export class FreeFlight {
     // Centre of a 5 m grid tile, so no grid line runs right under the camera
     this.spawnPosition.set(2.5, profile.size.y / 2, 2.5);
     this.respawn();
+  }
+
+  /** Where respawn puts the drone. `position` is on the ground; `yawDeg` turns it about the vertical. */
+  setSpawn(position: readonly [number, number, number], yawDeg = 0): void {
+    this.spawnPosition.set(position[0], position[1] + this.drone.profile.size.y / 2, position[2]);
+    this.spawnOrientation.setFromAxisAngle(UP, (yawDeg * Math.PI) / 180);
   }
 
   /** True while the quad lies upside down long enough that the player should respawn. */
@@ -111,6 +121,7 @@ export class FreeFlight {
     d.step(input.sticks, PHYSICS_DT);
     this.flightTime += PHYSICS_DT;
     this.recorder?.record(d.body, input.sticks, d.quad.motors);
+    this.afterStep?.(PHYSICS_DT);
 
     const c = d.contact;
     if (c.impactSpeed > IMPACT_LIGHT) e.impact = Math.max(e.impact, c.impactSpeed);

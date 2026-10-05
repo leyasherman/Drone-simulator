@@ -45,6 +45,10 @@ export class FlightCamera {
     this.applyMode();
   }
 
+  setMode(mode: CameraMode): void {
+    if (mode !== this.mode) this.toggle();
+  }
+
   setAspect(aspect: number): void {
     this.camera.aspect = aspect;
     this.camera.updateProjectionMatrix();

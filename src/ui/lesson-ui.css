@@ -1,0 +1,315 @@
+.lesson-ui {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  font-family: var(--font-body);
+  color: var(--ink);
+}
+
+.lesson-ui button {
+  font: inherit;
+  cursor: pointer;
+}
+
+/* Step badge, top left */
+.lesson-badge:not(:empty) {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  min-width: 300px;
+  padding: 12px 18px 14px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-card);
+  background: var(--paper);
+  box-shadow: var(--shadow-card);
+  pointer-events: auto;
+}
+
+.lb-step {
+  font: 700 12px/1 var(--font-body);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.lb-title {
+  margin-top: 6px;
+  font: 800 26px/1 var(--font-display);
+}
+
+.lb-links {
+  display: flex;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.lb-links button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-soft);
+  font: 700 13px/1 var(--font-body);
+  text-decoration: underline;
+}
+
+/* Instructor and speech bubble, bottom */
+.lesson-instructor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0;
+}
+
+.lesson-mascot {
+  position: absolute;
+  left: 2vw;
+  bottom: 0;
+  width: clamp(120px, 15vw, 200px);
+}
+
+.mascot {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 6px 10px rgba(17, 23, 34, 0.25));
+}
+
+.mascot .m-head {
+  fill: #f4f6fa;
+  stroke: var(--ink);
+  stroke-width: 4;
+}
+.mascot .m-visor {
+  fill: #1d2a44;
+}
+.mascot .m-eye {
+  fill: #7fe3ff;
+}
+.mascot .m-headset {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+.mascot .m-ear,
+.mascot .m-mic {
+  fill: var(--action);
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+.mascot .m-prop rect {
+  fill: var(--ink);
+}
+.mascot .m-body {
+  fill: #24406e;
+  stroke: var(--ink);
+  stroke-width: 4;
+  stroke-linejoin: round;
+}
+.mascot .m-collar {
+  fill: none;
+  stroke: var(--action);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mascot .m-badge {
+  fill: var(--reward);
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+.mascot .m-arms path {
+  fill: none;
+  stroke: #24406e;
+  stroke-width: 18;
+  stroke-linecap: round;
+}
+.mascot .m-hand {
+  fill: #f4f6fa;
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+.mascot .m-legs {
+  stroke: #1d2a44;
+  stroke-width: 18;
+  stroke-linecap: round;
+}
+.mascot .m-shoe {
+  fill: var(--ink);
+}
+
+.lesson-bubble {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  width: min(620px, 60vw);
+  padding: 20px 26px 16px;
+  border: 2px solid var(--ink);
+  border-radius: 26px;
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+  pointer-events: auto;
+}
+
+.lesson-bubble p {
+  margin: 0;
+  font: 500 20px/1.45 var(--font-body);
+}
+
+.lesson-bubble.clickable {
+  cursor: pointer;
+}
+
+.lb-continue {
+  margin-top: 10px;
+  color: var(--ink-soft);
+  font: 700 13px/1 var(--font-body);
+}
+
+.lb-continue span {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--reward);
+  color: var(--ink);
+}
+
+/* XP pops, right middle */
+.lesson-pops {
+  position: absolute;
+  right: 28px;
+  top: 42%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.lesson-pop {
+  padding: 8px 14px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--reward);
+  font: 800 18px/1 var(--font-display);
+  text-transform: uppercase;
+  box-shadow: 0 3px 0 var(--ink);
+  animation: lesson-pop 1.6s ease-out forwards;
+}
+
+@keyframes lesson-pop {
+  0% {
+    transform: translateY(12px) scale(0.8);
+    opacity: 0;
+  }
+  15% {
+    transform: translateY(0) scale(1.05);
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-18px);
+    opacity: 0;
+  }
+}
+
+/* Completion card, left */
+.lesson-complete {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  bottom: 16px;
+  width: min(440px, 92vw);
+  padding: 28px;
+  border: 2px solid var(--ink);
+  border-radius: 28px;
+  background: var(--paper);
+  box-shadow: var(--shadow-card);
+  pointer-events: auto;
+  overflow: auto;
+}
+
+.lc-chip {
+  display: inline-block;
+  padding: 6px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: var(--reward);
+  font: 700 14px/1 var(--font-body);
+  transform: rotate(-2deg);
+}
+
+.lesson-complete h1 {
+  margin: 14px 0 18px;
+  font: 800 52px/0.95 var(--font-display);
+  text-transform: uppercase;
+}
+
+.lc-xp {
+  padding: 16px 18px;
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+}
+
+.lc-xp-main {
+  font: 800 34px/1 var(--font-display);
+}
+
+.lc-xp-split {
+  margin-top: 6px;
+  color: var(--ink-soft);
+  font: 600 14px/1 var(--font-body);
+}
+
+.lc-actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.lc-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  color: var(--ink);
+  font: 800 22px/1 var(--font-display) !important;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+.lc-btn span {
+  font: 700 12px/1 var(--font-mono);
+  color: var(--ink-soft);
+}
+
+.lc-btn i {
+  margin-left: auto;
+  font-style: normal;
+}
+
+.lc-btn.primary {
+  border: 2px solid var(--ink);
+  background: var(--action);
+  box-shadow: 0 3px 0 var(--ink);
+}
+
+.lc-btn:hover {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 760px) {
+  .lesson-mascot {
+    display: none;
+  }
+  .lesson-bubble {
+    width: calc(100vw - 32px);
+  }
+}
