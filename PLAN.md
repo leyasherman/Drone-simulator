@@ -118,7 +118,7 @@ preview, JSON export/import.
 
 ## Data and release
 
-### Stage 12a. Supabase: accounts and progress in the database `[~]`
+### Stage 12a. Supabase: accounts and progress in the database `[x]`
 Tables profiles and lesson_completions with RLS; XP and completions written only through RPC functions that check
 and cap them. A silent anonymous account on the first visit. Progress loads from and saves to Supabase
 (local copy as offline fallback). Supabase URL and publishable key set in Vercel.
