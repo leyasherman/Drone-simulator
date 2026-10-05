@@ -48,7 +48,6 @@ const KEYS = {
   arm: 'Space',
   respawn: 'KeyR',
   camera: 'KeyC',
-  pause: 'Escape',
 } as const;
 
 const GAME_KEYS = new Set<string>(Object.values(KEYS));
@@ -82,6 +81,11 @@ export class KeyboardInput implements InputSource {
 
   keyUp(code: string): void {
     this.down.delete(code);
+  }
+
+  /** Forgets presses not yet read (call when switching screens, so a menu key does not reach the flight). */
+  flush(): void {
+    this.pressed.clear();
   }
 
   /** Releases everything, e.g. when the window loses focus. */
@@ -138,7 +142,6 @@ export class KeyboardInput implements InputSource {
     actions.armToggle ||= this.pressed.has(KEYS.arm);
     actions.respawn ||= this.pressed.has(KEYS.respawn);
     actions.camera ||= this.pressed.has(KEYS.camera);
-    actions.pause ||= this.pressed.has(KEYS.pause);
     this.pressed.clear();
 
     const touched = this.touched;

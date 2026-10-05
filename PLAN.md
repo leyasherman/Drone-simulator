@@ -15,7 +15,8 @@ Stack: TypeScript, Three.js, Vite, Vercel, Supabase. Free tiers only.
 Status: `[ ]` not started, `[~]` in progress, `[x]` done (criteria checked, committed).
 Rule: one stage at a time. After each stage, report and wait for approval.
 
-**Build order (agreed 2026-10-05):** 0, 1, 2a, 2b, 3, 4, 5, 7a, 8, 9a, 9b, 10a, 10b, 11, 6, 7b, 12, 13.
+**Build order (agreed 2026-10-05):** 0, 1, 2a, 2b, 3, 4, 5, 7a, 8, 9a, 9b, 10a, 10b, 7b, 11, 6, 12, 13.
+7b moved before 11 (2026-10-05): without a start menu and an intro, a new player cannot find the lessons.
 Lessons come before the city map: they are what the client values most and they only need the training area.
 
 ---
@@ -72,10 +73,12 @@ HUD like the original: speed (km/h) and altitude (m) top right, horizon marker i
 The debug panel moves behind F3.
 **Done when:** HUD shows correct values while flying; F3 toggles the debug panel.
 
-### Stage 7b. Menus and settings `[ ]`
-Design tokens, pause menu (Resume, Respawn, Settings, Main menu), settings (controls, rate presets,
-FOV/uptilt, graphics), main menu (Free flight, Flight school). SVG placeholder mascot.
-**Done when:** "menu → fly → pause → settings → back" works with mouse and keyboard; settings survive a reload.
+### Stage 7b. Menus, intro and settings `[x]`
+Main menu at start (Flight School, Free flight, Controls intro, Settings). A short intro with the mascot on the first
+visit (controls, arming, respawn, Esc). Pause menu on Esc (Resume, Respawn, Flight School, Settings, Main menu).
+Settings: keyboard feel, gamepad throttle mode, rate preset, FPV FOV and uptilt, graphics quality. Saved locally.
+**Done when:** a first-time visitor sees the intro, then the menu, and can reach lessons and free flight by mouse;
+Esc pauses and resumes; settings apply at once and survive a reload.
 
 ## Lessons
 

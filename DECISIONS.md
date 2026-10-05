@@ -21,6 +21,23 @@ the research in `sendline-main/docs/` or from PLAN.md.
 
 <!-- Entries below -->
 
+## D-020. Menus, intro, pause, settings
+- Date: 2026-10-05
+- Stage: 7b (moved before 11)
+- Status: accepted
+- Start: a first visit plays a 6-line intro with the mascot (controls, arming, respawn, Esc, gamepad), then the
+  main menu (Flight School, Free flight, Controls, Settings). Later visits open the main menu. ?lesson=<id> and
+  ?free skip straight in (handy for testing and links).
+- One screen at a time (menu, intro, pause, settings, lesson list). While a screen is open the sim is paused,
+  input is still polled so keys pressed there are used up, and the keyboard is flushed on resume, so Space in a
+  menu cannot arm the quad. Esc: flight → pause → resume; Esc in settings goes back; gamepad Start pauses.
+- Settings (saved locally, validated per field so one bad value does not reset the rest): keyboard feel,
+  gamepad throttle mode, rate preset, FPV FOV and uptilt, quality (Low = pixel ratio 1 and no shadows).
+  The G and T debug keys are gone; settings replace them.
+- Our own copy and look: "Drone Sim", "Holding pattern." for pause. Mascot styles moved to a shared mascot.css.
+- Bug found by the browser script: components set display: grid, which beat the hidden attribute, so hidden
+  screens still caught clicks. Fixed globally with [hidden] { display: none !important }.
+
 ## D-019. Course 1 lessons, autopilot, lesson lane
 - Date: 2026-10-05
 - Stage: 10b

@@ -23,7 +23,7 @@ export const MEMORY_STORE: KeyValueStore = (() => {
   return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => void m.set(k, v) };
 })();
 
-function browserStore(): KeyValueStore {
+export function browserStore(): KeyValueStore {
   try {
     const s = globalThis.localStorage;
     s.setItem('fpv.probe', '1');

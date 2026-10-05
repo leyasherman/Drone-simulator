@@ -52,6 +52,15 @@ export class LessonSession {
     this.skipToPractice();
   }
 
+  /** Respawn from the pause menu: back on the pad, armed, done objectives kept. */
+  respawn(): void {
+    if (this.phase !== 'practice') return;
+    this.flight.respawn();
+    this.flight.clock.reset();
+    this.runner.practice.onRespawn();
+    this.flight.drone.armed = true;
+  }
+
   /** Leaves the lesson: unhooks from the flight. */
   end(): void {
     this.flight.afterStep = null;

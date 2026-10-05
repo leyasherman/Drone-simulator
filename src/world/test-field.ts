@@ -19,6 +19,8 @@ export interface TestField {
   scene: THREE.Scene;
   /** Keeps the sun's shadow box centred on the drone. Call each frame. */
   follow(target: THREE.Vector3): void;
+  /** Shadows are the most expensive effect; off on Low quality. */
+  setShadows(on: boolean): void;
 }
 
 /** Ground texture: 1 m minor lines, 5 m major lines. One tile covers 5 m. */
@@ -195,6 +197,9 @@ export function createTestField(layout: readonly BoxSpec[]): TestField {
 
   return {
     scene,
+    setShadows(on) {
+      sun.castShadow = on;
+    },
     follow(target) {
       sun.target.position.copy(target);
       sun.position.set(target.x + 30, target.y + 60, target.z + 20);

@@ -1,19 +1,22 @@
 import * as THREE from 'three';
 import { Autopilot } from './game/autopilot';
 import { allCourses, getLesson, nextLessonId } from './game/content';
-import { Progress } from './game/progress';
 import { FreeFlight } from './game/free-flight';
 import { LessonSession } from './game/lesson-session';
+import { Progress, browserStore } from './game/progress';
+import { loadSettings, saveSettings, type Settings } from './game/settings';
 import { ARM_THROTTLE_LIMIT } from './input/arming';
 import { InputManager } from './input/input';
 import { KEYBOARD_GENTLE, KEYBOARD_NORMAL } from './input/keyboard';
 import { FlightCamera } from './render/cameras';
 import { FREESTYLE_5 } from './sim/profiles';
+import { RATE_PRESETS } from './sim/rates';
 import { ClipPlayer, Recorder, clipDuration, clipToJson, type ClipJson } from './sim/recording';
 import { DebugPanel } from './ui/debug-panel';
 import { Hud } from './ui/hud';
 import { LessonList } from './ui/lesson-list';
 import { LessonUi } from './ui/lesson-ui';
+import { Intro, MainMenu, PauseMenu, SettingsPanel, type IntroLine } from './ui/menus';
 import { Prompts } from './ui/prompts';
 import { RadioOverlay } from './ui/radio-overlay';
 import { DroneModel } from './world/drone-model';
@@ -25,7 +28,6 @@ const canvas = document.querySelector<HTMLCanvasElement>('#scene');
 if (!canvas) throw new Error('Canvas #scene not found');
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -48,9 +50,11 @@ window.addEventListener('resize', resize);
 resize();
 
 const FREE_SPAWN = [2.5, 0, 2.5] as const;
+const store = browserStore();
 const input = new InputManager();
 input.keyboard.attach(window);
 const flight = new FreeFlight(FREESTYLE_5, input, collidersFrom(layout));
+const progress = new Progress(store);
 const hud = new Hud(document.body);
 const radio = new RadioOverlay(document.body);
 const prompts = new Prompts(document.body);
@@ -60,6 +64,141 @@ recBadge.className = 'rec-badge';
 recBadge.hidden = true;
 document.body.append(recBadge);
 
+// ---- Settings ----
+
+let settings: Settings = loadSettings(store);
+
+function applySettings(s: Settings): void {
+  input.keyboard.feel = s.keyboardFeel === 'gentle' ? KEYBOARD_GENTLE : KEYBOARD_NORMAL;
+  input.gamepad.options.throttleMode = s.gamepadThrottle;
+  flight.drone.rates = RATE_PRESETS[s.rates];
+  view.fpv.fov = s.fov;
+  view.fpv.uptilt = s.uptilt;
+  view.refresh();
+  renderer.setPixelRatio(s.quality === 'low' ? 1 : Math.min(window.devicePixelRatio, 2));
+  field.setShadows(s.quality === 'high');
+  resize();
+}
+applySettings(settings);
+
+function updateSettings(s: Settings): void {
+  settings = s;
+  applySettings(s);
+  saveSettings(store, s);
+}
+
+// ---- Screens ----
+// While any screen is open the sim is paused; input is still polled so keys pressed there are used up.
+
+type Screen = 'none' | 'menu' | 'intro' | 'pause' | 'settings' | 'list';
+let screen: Screen = 'none';
+/** Where Settings and the lesson list go back to. */
+let settingsReturn: Screen = 'menu';
+let listReturn: Screen = 'menu';
+
+const INTRO: IntroLine[] = [
+  {
+    text: "Welcome to flight school! I'm your instructor. Let me show you the controls before you take off.",
+  },
+  {
+    text: 'Throttle and turning are on the left: W and S for throttle, A and D to turn.',
+    keys: ['W', 'S', 'A', 'D'],
+  },
+  {
+    text: 'Tilt is on the right: the arrow keys lean the drone forward, back and to the sides. Leaning is how you move.',
+    keys: ['↑', '↓', '←', '→'],
+  },
+  {
+    text: "Space arms the motors. Keep the throttle all the way down first, or it won't arm.",
+    keys: ['Space'],
+  },
+  {
+    text: 'Crashed or upside down? R puts you back on the pad. C switches the camera, Esc opens the menu.',
+    keys: ['R', 'C', 'Esc'],
+  },
+  {
+    text: "Got a gamepad? Left stick is throttle and turn, right stick is tilt, A arms. Now pick Flight School and let's fly.",
+    keys: ['Gamepad · Mode 2'],
+  },
+];
+
+const mainMenu = new MainMenu(document.body, (id) => {
+  if (id === 'school') openLessonList('menu');
+  if (id === 'free') startFreeFlight();
+  if (id === 'intro') playIntro();
+  if (id === 'settings') openSettings('menu');
+});
+const pauseMenu = new PauseMenu(document.body, (id) => {
+  if (id === 'resume') resume();
+  if (id === 'respawn') {
+    if (lesson) lesson.respawn();
+    else flight.respawn();
+    resume();
+  }
+  if (id === 'school') openLessonList('pause');
+  if (id === 'settings') openSettings('pause');
+  if (id === 'menu') showMainMenu();
+});
+const settingsPanel = new SettingsPanel(document.body, updateSettings, () => show(settingsReturn));
+const intro = new Intro(document.body);
+
+/** Shows one screen (or none) and hides the others. */
+function show(s: Screen): void {
+  screen = s;
+  mainMenu.visible = s === 'menu';
+  pauseMenu.visible = s === 'pause';
+  settingsPanel.visible = s === 'settings';
+  if (s !== 'intro') intro.visible = false;
+  if (s !== 'list') lessonList.close();
+  // Flight UI only while flying
+  const flying = s === 'none';
+  hud.visible = flying && (!lesson || lesson.phase === 'practice');
+  lessonUi.visible = flying && lesson !== null;
+  if (flying) {
+    input.keyboard.flush();
+    flight.clock.reset(); // do not catch up the paused time
+  }
+}
+
+function showMainMenu(): void {
+  if (lesson) exitLesson();
+  if (bench !== 'live') cycleBenchTo('live');
+  flight.setSpawn(FREE_SPAWN);
+  flight.respawn();
+  view.setMode('chase');
+  show('menu');
+}
+
+function playIntro(): void {
+  show('intro');
+  intro.play(INTRO, () => {
+    updateSettings({ ...settings, introSeen: true });
+    showMainMenu();
+  });
+}
+
+function openSettings(from: Screen): void {
+  settingsReturn = from;
+  settingsPanel.open(settings);
+  show('settings');
+}
+
+function pause(): void {
+  if (screen === 'none') show('pause');
+}
+
+function resume(): void {
+  show('none');
+}
+
+function startFreeFlight(): void {
+  if (lesson) exitLesson();
+  flight.setSpawn(FREE_SPAWN);
+  flight.respawn();
+  view.setMode('fpv');
+  show('none');
+}
+
 // ---- Lessons ----
 
 let lesson: LessonSession | null = null;
@@ -67,7 +206,6 @@ let lesson: LessonSession | null = null;
 let lessonUiKey = '';
 /** Set once a lesson's completion has been saved, so it is saved only once per run. */
 let completionSaved = false;
-const progress = new Progress();
 const lessonUi = new LessonUi(document.body, {
   advance: () => lesson?.advance(),
   skip: () => lesson?.skipToPractice(),
@@ -75,7 +213,7 @@ const lessonUi = new LessonUi(document.body, {
     completionSaved = false;
     lesson?.tryAgain();
   },
-  lessons: () => openLessonList(lesson?.lesson.id),
+  lessons: () => openLessonList('menu', lesson?.lesson.id),
   next: () => {
     const next = lesson && nextLessonId(lesson.lesson.id);
     if (next) startLesson(next);
@@ -83,16 +221,16 @@ const lessonUi = new LessonUi(document.body, {
 });
 const lessonList = new LessonList(document.body, allCourses(), getLesson, progress, {
   start: (id) => startLesson(id),
-  close: () => {
-    lessonList.close();
-    exitLesson();
-  },
+  close: () =>
+    listReturn === 'pause' ? show('pause') : listReturn === 'none' ? startFreeFlight() : showMainMenu(),
 });
 
-/** Shows the flight school screen; the sim keeps drawing behind it. */
-function openLessonList(select?: string): void {
+/** Shows the flight school screen. `from` is where closing it goes back to. */
+function openLessonList(from: Screen, select?: string): void {
   if (lesson) exitLesson();
   if (bench !== 'live') cycleBenchTo('live');
+  listReturn = from === 'pause' ? 'none' : from;
+  show('list');
   lessonList.open(select);
 }
 
@@ -100,15 +238,14 @@ function startLesson(id: string): void {
   const l = getLesson(id);
   if (!l) return;
   if (bench !== 'live') cycleBenchTo('live');
-  lessonList.close();
   completionSaved = false;
   lesson?.end();
   lesson = new LessonSession(l, flight);
   lesson.start();
   objectives.set(l.practice.objectives);
-  lessonUi.visible = true;
   radio.visible = true;
   lessonUiKey = '';
+  show('none');
 }
 
 function exitLesson(): void {
@@ -119,8 +256,6 @@ function exitLesson(): void {
   radio.visible = false;
   flight.setSpawn(FREE_SPAWN);
   flight.respawn();
-  flight.clock.reset();
-  view.setMode('fpv');
 }
 
 // ---- Recording bench (stage 8): P records, P plays back in a loop, P returns to flying ----
@@ -148,7 +283,7 @@ function cycleBenchTo(next: BenchMode): void {
     flight.recorder = null;
     player = null;
     view.setMode(cameraBeforePlayback);
-    flight.clock.reset(); // do not catch up the paused time
+    flight.clock.reset();
   }
   bench = next;
   recBadge.hidden = bench === 'live';
@@ -168,43 +303,44 @@ if (import.meta.env.DEV) {
       flight,
       input,
       view,
+      progress,
       lastClip: () => lastClip,
       bench: () => bench,
       lesson: () => lesson,
+      screen: () => screen,
+      settings: () => settings,
       startLesson,
       openLessonList,
+      startFreeFlight,
       Autopilot,
-      progress,
     },
   });
 }
 
 window.addEventListener('keydown', (e) => {
   if (e.repeat) return;
-  // L: flight school (until the main menu exists, stage 7b)
-  if (e.code === 'KeyL' && !lesson && !lessonList.visible) openLessonList();
-  if (e.code === 'KeyP' && !lesson && !lessonList.visible) cycleBench();
-  // In playback the sim is paused, so the camera key is read here
-  if (e.code === 'KeyC' && bench === 'playback') view.toggle();
+  if (e.code === 'Escape') {
+    if (screen === 'none') pause();
+    else if (screen === 'pause') resume();
+    else if (screen === 'settings') show(settingsReturn);
+    // The lesson list and the intro handle Esc themselves
+  }
+  if (screen !== 'none') return;
+  // Shortcuts while flying: L flight school, P record / playback (free flight only)
+  if (e.code === 'KeyL' && !lesson) openLessonList('none');
+  if (e.code === 'KeyP' && !lesson) cycleBench();
+  if (e.code === 'KeyC' && bench === 'playback') view.toggle(); // the sim is paused in playback
   if (e.code === 'F3') {
     e.preventDefault();
     panel.visible = !panel.visible;
-  }
-  if (e.code === 'KeyG') {
-    input.keyboard.feel = input.keyboard.feel === KEYBOARD_GENTLE ? KEYBOARD_NORMAL : KEYBOARD_GENTLE;
-  }
-  if (e.code === 'KeyT') {
-    const o = input.gamepad.options;
-    o.throttleMode = o.throttleMode === 'centerZero' ? 'fullRange' : 'centerZero';
   }
 });
 
 /** The persistent hint for the current situation, or '' for none. */
 function currentHint(): string {
   const pad = input.active.kind === 'gamepad';
-  if (lessonList.visible) return '';
   if (flight.respawnPrompt) return `Press ${pad ? 'B' : 'R'} to respawn`;
-  if (flight.drone.armed) return lesson || lessonList.visible ? '' : 'L: flight school';
+  if (flight.drone.armed) return '';
   return input.sticks.throttle > ARM_THROTTLE_LIMIT
     ? `Lower the throttle (${pad ? 'left stick down' : 'S'}) to arm`
     : `Press ${pad ? 'A' : 'Space'} to arm, then raise the throttle (${pad ? 'left stick' : 'hold W'})`;
@@ -220,24 +356,18 @@ let fps = 60;
 let impact = 0;
 
 /** Draws the live sim drone and reacts to its frame events. */
-function liveFrame(
-  frameSeconds: number,
-  now: number,
-  dt: number,
-  e: ReturnType<FreeFlight['frame']> | null,
-): void {
+function liveFrame(now: number, dt: number, e: ReturnType<FreeFlight['frame']> | null): void {
   if (e) {
     impact = e.impact;
     if (e.armBlocked) prompts.flash('Lower the throttle first', now, 1500);
     if (e.cameraToggle) view.toggle();
-    if (e.pause) prompts.flash('Pause menu comes later', now, 1000);
+    if (e.pause) pause(); // gamepad Start
     if (e.crashed) prompts.flash('Crash!', now, 1000);
   }
   flight.drone.body.interpolate(flight.alpha, renderPos, renderRot);
   model.update(flight.drone.quad.motors, dt);
   radio.update(input.sticks);
   hud.update(flight.speedKmh, flight.altitude);
-  void frameSeconds;
 }
 
 /** Draws a clip sample (bench playback or lesson demo). */
@@ -273,7 +403,7 @@ function lessonFrame(l: LessonSession, frameSeconds: number, now: number, dt: nu
     }
     prompts.update('', now);
   } else {
-    liveFrame(frameSeconds, now, dt, e);
+    liveFrame(now, dt, e);
     hud.visible = l.phase === 'practice';
     if (l.phase === 'practice' && lessonUiKey !== 'p') {
       lessonUiKey = 'p';
@@ -306,18 +436,26 @@ renderer.setAnimationLoop((now) => {
   fps += (1 / Math.max(frameSeconds, 1e-3) - fps) * 0.05;
   const dt = Math.min(frameSeconds, 0.1);
 
-  if (lesson) {
+  if (screen !== 'none') {
+    // Paused behind a screen. Gamepad Start toggles the pause menu.
+    input.update(dt);
+    if (input.actions.pause && screen === 'pause') resume();
+    prompts.update('', now);
+  } else if (lesson) {
     lessonFrame(lesson, frameSeconds, now, dt);
   } else if (player) {
     clipFrame(player.update(dt), dt);
     recBadge.textContent = `PLAYBACK  ${player.time.toFixed(1)} / ${clipDuration(player.clip).toFixed(1)} s  ·  C camera  ·  P to fly`;
     prompts.update('', now);
   } else {
-    hud.visible = true;
-    liveFrame(frameSeconds, now, dt, flight.frame(frameSeconds));
+    liveFrame(now, dt, flight.frame(frameSeconds));
     prompts.update(currentHint(), now);
   }
 
+  if (screen !== 'none' && !player) {
+    // Keep the drone drawn where it is
+    flight.drone.body.interpolate(1, renderPos, renderRot);
+  }
   hud.markerVisible = view.mode === 'fpv';
   model.root.position.copy(renderPos);
   model.root.quaternion.copy(renderRot);
@@ -329,15 +467,17 @@ renderer.setAnimationLoop((now) => {
     armed: flight.drone.armed,
     lines: [
       `${fps.toFixed(0)} fps · ground: ${flight.drone.ground.state} · last impact ${impact.toFixed(1)} m/s`,
-      `camera: ${view.mode} (C) · keyboard: ${input.keyboard.feel === KEYBOARD_GENTLE ? 'gentle' : 'normal'} (G)`,
-      input.gamepad.connected
-        ? `gamepad throttle: ${input.gamepad.options.throttleMode} (T)`
-        : 'gamepad: press a button to connect',
-      'L lesson · P record · R respawn · F3 hide',
+      `screen: ${screen} · camera: ${view.mode} (C)`,
+      input.gamepad.connected ? `gamepad: ${input.gamepad.label}` : 'gamepad: press a button to connect',
+      'Esc menu · L lessons · P record · R respawn · F3 hide',
     ],
   });
   renderer.render(field.scene, view.camera);
 });
 
+// Start: ?lesson=<id> jumps straight in; a first visit gets the intro; otherwise the main menu
 const startWith = params.get('lesson');
-if (startWith) startLesson(startWith);
+if (startWith && getLesson(startWith)) startLesson(startWith);
+else if (params.has('free')) startFreeFlight();
+else if (!settings.introSeen) playIntro();
+else showMainMenu();

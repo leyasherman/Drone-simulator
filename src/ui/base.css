@@ -11,3 +11,8 @@ body {
   width: 100vw;
   height: 100vh;
 }
+
+/* Our components set display (grid, flex); this keeps the hidden attribute working everywhere */
+[hidden] {
+  display: none !important;
+}

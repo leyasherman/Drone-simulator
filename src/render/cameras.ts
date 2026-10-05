@@ -54,6 +54,11 @@ export class FlightCamera {
     this.camera.updateProjectionMatrix();
   }
 
+  /** Re-applies FOV and layers after a settings change. */
+  refresh(): void {
+    this.applyMode();
+  }
+
   private applyMode(): void {
     const c = this.camera;
     c.layers.set(0);

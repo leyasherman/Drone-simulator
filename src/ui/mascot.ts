@@ -1,3 +1,4 @@
+import './mascot.css';
 import type { POSES } from '../game/lesson-schema';
 
 export type Pose = (typeof POSES)[number];
