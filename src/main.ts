@@ -3,6 +3,9 @@ import { Autopilot } from './game/autopilot';
 import { allCourses, getLesson, nextLessonId } from './game/content';
 import { FreeFlight } from './game/free-flight';
 import { LessonSession } from './game/lesson-session';
+import { DraftStore, validate, type Draft } from './game/editor/draft';
+import type { Lesson } from './game/lesson-schema';
+import { EditorPanel } from './ui/editor-panel';
 import { Progress, browserStore } from './game/progress';
 import { ProgressSync, supabaseBackend } from './net/progress-sync';
 import { Account } from './net/account';
@@ -15,7 +18,15 @@ import { KEYBOARD_GENTLE, KEYBOARD_NORMAL } from './input/keyboard';
 import { FlightCamera } from './render/cameras';
 import { FREESTYLE_5 } from './sim/profiles';
 import { RATE_PRESETS } from './sim/rates';
-import { ClipPlayer, Recorder, clipDuration, clipToJson, type ClipJson } from './sim/recording';
+import {
+  ClipPlayer,
+  Recorder,
+  clipDuration,
+  clipFromJson,
+  clipToJson,
+  type Clip,
+  type ClipJson,
+} from './sim/recording';
 import { DebugPanel } from './ui/debug-panel';
 import { Hud } from './ui/hud';
 import { LessonList } from './ui/lesson-list';
@@ -142,6 +153,7 @@ const mainMenu = new MainMenu(
     if (id === 'free') startFreeFlight();
     if (id === 'intro') playIntro();
     if (id === 'settings') openSettings('menu');
+    if (id === 'editor') openEditor();
     if (id === 'account' && accountPanel) {
       show('account');
       void accountPanel.open();
@@ -204,6 +216,8 @@ function show(s: Screen): void {
 }
 
 function showMainMenu(): void {
+  closeEditor();
+  testingDraft = null;
   if (lesson) exitLesson();
   if (bench !== 'live') cycleBenchTo('live');
   flight.setSpawn(FREE_SPAWN);
@@ -235,6 +249,8 @@ function resume(): void {
 }
 
 function startFreeFlight(): void {
+  closeEditor();
+  testingDraft = null;
   if (lesson) exitLesson();
   flight.setSpawn(FREE_SPAWN);
   flight.respawn();
@@ -256,9 +272,9 @@ const lessonUi = new LessonUi(document.body, {
     completionSaved = false;
     lesson?.tryAgain();
   },
-  lessons: () => openLessonList('menu', lesson?.lesson.id),
+  lessons: () => (testingDraft ? backToEditor() : openLessonList('menu', lesson?.lesson.id)),
   next: () => {
-    const next = lesson && nextLessonId(lesson.lesson.id);
+    const next = lesson && !testingDraft && nextLessonId(lesson.lesson.id);
     if (next) startLesson(next);
   },
 });
@@ -270,6 +286,8 @@ const lessonList = new LessonList(document.body, allCourses(), getLesson, progre
 
 /** Shows the flight school screen. `from` is where closing it goes back to. */
 function openLessonList(from: Screen, select?: string): void {
+  closeEditor();
+  testingDraft = null;
   if (lesson) exitLesson();
   if (bench !== 'live') cycleBenchTo('live');
   listReturn = from === 'pause' ? 'none' : from;
@@ -279,11 +297,15 @@ function openLessonList(from: Screen, select?: string): void {
 
 function startLesson(id: string): void {
   const l = getLesson(id);
-  if (!l) return;
+  if (l) startLessonData(l);
+}
+
+/** Plays a lesson; `clipFor` finds its demo clips (bundled content unless testing an editor draft). */
+function startLessonData(l: Lesson, clipFor?: (id: string) => Clip | undefined): void {
   if (bench !== 'live') cycleBenchTo('live');
   completionSaved = false;
   lesson?.end();
-  lesson = new LessonSession(l, flight);
+  lesson = new LessonSession(l, flight, clipFor);
   lesson.start();
   objectives.set(l.practice.objectives);
   radio.visible = true;
@@ -299,6 +321,75 @@ function exitLesson(): void {
   radio.visible = false;
   flight.setSpawn(FREE_SPAWN);
   flight.respawn();
+}
+
+// ---- Lesson editor: build a lesson while flying ----
+
+let editing = false;
+/** The editor draft being played with "Test lesson", or null. */
+let testingDraft: Draft | null = null;
+const drafts = new DraftStore(store);
+const editor = new EditorPanel(document.body, drafts, {
+  pose: () => ({ position: flight.drone.body.position, orientation: flight.drone.body.orientation }),
+  startRecording: (spawn) => {
+    flight.setSpawn(spawn.position, spawn.yaw);
+    flight.respawn();
+    flight.clock.reset();
+    flight.recorder = new Recorder(120);
+    recBadge.hidden = false;
+    recBadge.classList.add('recording');
+    recBadge.textContent = 'REC  ·  fly the demo, then press Stop';
+  },
+  stopRecording: () => {
+    const rec = flight.recorder;
+    flight.recorder = null;
+    recBadge.hidden = true;
+    recBadge.classList.remove('recording');
+    return rec ? clipToJson(rec.toClip()) : null;
+  },
+  test: (d) => testDraft(d),
+  changed: (d) => {
+    if (editing) objectives.set(d.lesson.practice.objectives);
+  },
+  exit: () => showMainMenu(),
+});
+
+function openEditor(): void {
+  if (lesson) exitLesson();
+  if (bench !== 'live') cycleBenchTo('live');
+  testingDraft = null;
+  editing = true;
+  flight.setSpawn(FREE_SPAWN);
+  flight.respawn();
+  view.setMode('fpv');
+  editor.visible = true;
+  show('none');
+}
+
+function closeEditor(): void {
+  if (!editing) return;
+  editing = false;
+  if (flight.recorder) {
+    flight.recorder = null;
+    recBadge.hidden = true;
+  }
+  editor.visible = false;
+  objectives.clear();
+}
+
+/** Plays the editor's draft as a lesson, with its recorded demos. */
+function testDraft(d: Draft): void {
+  const v = validate(d);
+  if (!v.ok || !v.lesson) return;
+  closeEditor();
+  testingDraft = d;
+  startLessonData(v.lesson, (id) => (d.clips[id] ? clipFromJson(d.clips[id]) : undefined));
+}
+
+/** Leaves a test run and goes back to editing the same draft. */
+function backToEditor(): void {
+  if (lesson) exitLesson();
+  openEditor();
 }
 
 // ---- Recording bench (stage 8): P records, P plays back in a loop, P returns to flying ----
@@ -355,6 +446,8 @@ if (import.meta.env.DEV) {
       screen: () => screen,
       settings: () => settings,
       startLesson,
+      openEditor,
+      editor,
       openLessonList,
       startFreeFlight,
       Autopilot,
@@ -373,8 +466,8 @@ window.addEventListener('keydown', (e) => {
   }
   if (screen !== 'none') return;
   // Shortcuts while flying: L flight school, P record / playback (free flight only)
-  if (e.code === 'KeyL' && !lesson) openLessonList('none');
-  if (e.code === 'KeyP' && !lesson) cycleBench();
+  if (e.code === 'KeyL' && !lesson && !editing) openLessonList('none');
+  if (e.code === 'KeyP' && !lesson && !editing) cycleBench();
   if (e.code === 'KeyC' && bench === 'playback') view.toggle(); // the sim is paused in playback
   if (e.code === 'F3') {
     e.preventDefault();
@@ -459,7 +552,8 @@ function lessonFrame(l: LessonSession, frameSeconds: number, now: number, dt: nu
     if (l.phase === 'complete' && lessonUiKey !== 'c') {
       lessonUiKey = 'c';
       view.setMode('chase');
-      if (!completionSaved) {
+      // A test run of an editor draft earns nothing
+      if (!completionSaved && !testingDraft) {
         completionSaved = true;
         if (sync) void sync.complete(l.lesson.id, r.result.flightXp, r.result.totalXp);
         else progress.complete(l.lesson.id, r.result.totalXp);
@@ -467,7 +561,7 @@ function lessonFrame(l: LessonSession, frameSeconds: number, now: number, dt: nu
       lessonUi.showComplete({
         title: l.lesson.title,
         result: r.result,
-        hasNext: nextLessonId(l.lesson.id) !== undefined,
+        hasNext: !testingDraft && nextLessonId(l.lesson.id) !== undefined,
       });
     }
     while (l.xpPops.length) lessonUi.xpPop(l.xpPops.shift()!);
@@ -496,6 +590,7 @@ renderer.setAnimationLoop((now) => {
     prompts.update('', now);
   } else {
     liveFrame(now, dt, flight.frame(frameSeconds));
+    if (editing) objectives.update(() => 'waiting', dt);
     prompts.update(currentHint(), now);
   }
 

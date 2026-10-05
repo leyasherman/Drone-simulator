@@ -21,6 +21,24 @@ the research in `sendline-main/docs/` or from PLAN.md.
 
 <!-- Entries below -->
 
+## D-024. Lesson editor (in the game)
+- Date: 2026-10-05
+- Stage: 11a
+- Status: accepted
+- Placing by flying: the author flies to a spot and presses a button. A gate goes 3 m ahead of the drone, facing it
+  (so flying on forward passes it); a pad goes on the ground below; the spawn takes the drone's spot and heading.
+  Numbers in the panel fine-tune position, turn, tilt and size. No 3D gizmo: flying is the natural tool here and
+  avoids a second camera mode. Revisit if authors need precise placement far from where they can fly.
+- Demos are recorded by flying (the recorder from stage 8), from the lesson's spawn, one clip per step,
+  named <lesson>-<step>. Clips no step uses are dropped.
+- Drafts live in the browser (localStorage). Export is one file with the lesson and its clips
+  ({format: "fpv-lesson", version: 1, lesson, clips}); import also opens a bare lesson from content/lessons.
+- validate() = lesson schema + editor rules (an objective exists, every demo is recorded), with plain messages.
+- Test plays the draft through the normal lesson flow with its own clips; a test run earns no XP, and leaving it
+  returns to the editor with the same draft.
+- Typing in the panel never flies the drone (game keys ignore form fields, D-023).
+- Next (11b): publish drafts to Supabase so every player gets them.
+
 ## D-023. Account screen (email and password)
 - Date: 2026-10-05
 - Stage: 12b

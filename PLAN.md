@@ -15,7 +15,7 @@ Stack: TypeScript, Three.js, Vite, Vercel, Supabase. Free tiers only.
 Status: `[ ]` not started, `[~]` in progress, `[x]` done (criteria checked, committed).
 Rule: one stage at a time. After each stage, report and wait for approval.
 
-**Build order (agreed 2026-10-05):** 0, 1, 2a, 2b, 3, 4, 5, 7a, 8, 9a, 9b, 10a, 10b, 7b, 12a, 12b, 11, 6, 13.
+**Build order (agreed 2026-10-05):** 0, 1, 2a, 2b, 3, 4, 5, 7a, 8, 9a, 9b, 10a, 10b, 7b, 12a, 12b, 11a, 11b, 6, 13.
 12 moved before 11 (2026-10-05): the client asked for login with Supabase.
 7b moved before 11 (2026-10-05): without a start menu and an intro, a new player cannot find the lessons.
 Lessons come before the city map: they are what the client values most and they only need the training area.
@@ -111,10 +111,17 @@ A lesson lane on the field, an autopilot that flies any lesson's objectives, dem
 six more lessons with our own texts.
 **Done when:** a test flies every lesson's practice with the autopilot and completes it; all 7 lessons play in the browser.
 
-### Stage 11. Lesson editor `[ ]`
-In-game editor: steps, instructor lines, recording the demo flight, placing gates and pads (gizmo, grid snap),
-preview, JSON export/import.
-**Done when:** a new lesson is made in the editor without code and a player can fly it straight away.
+### Stage 11a. Lesson editor in the game `[x]`
+A side panel over free flight: lesson details, spawn, steps with instructor lines and poses, practice objectives
+placed where the drone is (gate facing the drone's heading, or a pad below it) and fine-tuned with numbers,
+demo flights recorded by flying, a Test button that plays the draft as a lesson, drafts kept in the browser,
+JSON export and import (same format as content/lessons).
+**Done when:** a new lesson is made in the editor without touching code, passes the lesson schema, and can be
+played start to finish with Test; export then import gives the same lesson; tests cover the draft operations.
+
+### Stage 11b. Publish lessons through Supabase `[ ]`
+Lessons table with an author role; published lessons and their demo clips load for every player and show in the list.
+**Done when:** an author publishes a lesson from the editor and a fresh browser sees and plays it; non-authors cannot write lessons.
 
 ## Data and release
 

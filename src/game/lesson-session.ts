@@ -1,4 +1,4 @@
-import { ClipPlayer } from '../sim/recording';
+import { ClipPlayer, type Clip } from '../sim/recording';
 import { getClip } from './content';
 import type { FreeFlight } from './free-flight';
 import type { Lesson } from './lesson-schema';
@@ -18,6 +18,8 @@ export class LessonSession {
   constructor(
     readonly lesson: Lesson,
     private readonly flight: FreeFlight,
+    /** Where demo clips come from: bundled content by default, the editor's draft when testing. */
+    private readonly clipFor: (id: string) => Clip | undefined = getClip,
   ) {
     this.runner = new LessonRunner(lesson);
   }
@@ -83,7 +85,7 @@ export class LessonSession {
 
   private loadDemo(): void {
     const demo = this.runner.step.demo;
-    const clip = demo ? getClip(demo.clip) : undefined;
+    const clip = demo ? this.clipFor(demo.clip) : undefined;
     this.demo = clip ? new ClipPlayer(clip, true) : null;
   }
 

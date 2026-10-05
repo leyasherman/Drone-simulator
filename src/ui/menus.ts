@@ -41,7 +41,7 @@ class Overlay {
 }
 
 /** Start screen: title, a line about the game, the main choices, and the mascot. */
-export type MainMenuItem = 'school' | 'free' | 'intro' | 'settings' | 'account';
+export type MainMenuItem = 'school' | 'free' | 'intro' | 'settings' | 'account' | 'editor';
 
 export class MainMenu extends Overlay {
   private readonly player: HTMLButtonElement;
@@ -61,6 +61,7 @@ export class MainMenu extends Overlay {
             { id: 'free', label: 'Free flight' },
             ...(withAccount ? [{ id: 'account', label: 'Account' }] : []),
             { id: 'intro', label: 'Controls' },
+            { id: 'editor', label: 'Lesson editor' },
             { id: 'settings', label: 'Settings' },
           ])}</div>
         </div>
