@@ -2,7 +2,7 @@
 
 Browser FPV drone simulator that copies the mechanics of the reference sim.
 Plan: [PLAN.md](PLAN.md). Decision log: [DECISIONS.md](DECISIONS.md).
-Research: `sendline-main/docs/research/` (GUIDE.md, BUILD.md, internals notes).
+Research: `sendline-main/docs/research/` (guide, build steps, internals notes).
 What the original does: `docs/reference/`.
 
 ## Language
@@ -55,7 +55,7 @@ sendline-main/     reference prototype and research (read only, not in git, not 
 - Secrets only in `.env.local` (never committed). The client gets only `VITE_SUPABASE_URL` and the anon key.
 
 ## Do not copy
-- the reference sim's assets, models, textures, mascot (crash-test dummy), icons, fonts, dialogue, UI text or names.
+- The reference sim's assets, models, textures, mascot (crash-test dummy), icons, fonts, dialogue, UI text or names.
   Similar style (daylight low-poly world, light cards), our own execution.
 - The Sendline brand in `sendline-main/brand/`. Do not copy `sendline-main/` code (D-005); write our own and use it
   only as a reference for formulas and constants.
