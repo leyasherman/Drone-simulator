@@ -1,0 +1,72 @@
+.hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  color: var(--sky-ink);
+  user-select: none;
+}
+
+.hud-readouts {
+  position: absolute;
+  top: 24px;
+  right: 32px;
+  display: flex;
+  align-items: stretch;
+  gap: 22px;
+}
+
+.hud-readout {
+  min-width: 112px;
+}
+
+.hud-label {
+  font: 700 13px/1 var(--font-body);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-shadow: var(--shadow-text);
+}
+
+.hud-value {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 4px;
+  font: 800 64px/0.9 var(--font-display);
+  font-variant-numeric: tabular-nums;
+  text-shadow: var(--shadow-text);
+}
+
+.hud-unit {
+  font: 700 14px/1 var(--font-body);
+  color: var(--sky-ink-soft);
+}
+
+.hud-divider {
+  width: 2px;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 1px;
+}
+
+.hud-marker {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  filter: drop-shadow(0 1px 0 rgba(17, 23, 34, 0.7));
+  opacity: 0.9;
+}
+
+@media (max-width: 700px) {
+  .hud-readouts {
+    top: 12px;
+    right: 14px;
+    gap: 12px;
+  }
+  .hud-readout {
+    min-width: 80px;
+  }
+  .hud-value {
+    font-size: 44px;
+  }
+}

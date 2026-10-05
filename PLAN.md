@@ -67,7 +67,7 @@ without jitter; in the browser an upside-down drone shows the respawn prompt.
 Box-based world generator: lesson area (track, grid), city (roads, towers, wind turbines, cranes), map borders.
 **Done when:** map is ~400×400 m; 60 fps on a mid-range machine; leaving the borders returns you to spawn.
 
-### Stage 7a. Flight HUD `[ ]`
+### Stage 7a. Flight HUD `[x]`
 HUD like the original: speed (km/h) and altitude (m) top right, horizon marker in the centre.
 The debug panel moves behind F3.
 **Done when:** HUD shows correct values while flying; F3 toggles the debug panel.

@@ -6,6 +6,8 @@ import { KEYBOARD_GENTLE, KEYBOARD_NORMAL } from './input/keyboard';
 import { FlightCamera } from './render/cameras';
 import { FREESTYLE_5 } from './sim/profiles';
 import { DebugPanel } from './ui/debug-panel';
+import { Hud } from './ui/hud';
+import { Prompts } from './ui/prompts';
 import { DroneModel } from './world/drone-model';
 import { createTestField } from './world/test-field';
 import { collidersFrom, testFieldLayout } from './world/test-field-layout';
@@ -37,12 +39,18 @@ resize();
 const input = new InputManager();
 input.keyboard.attach(window);
 const flight = new FreeFlight(FREESTYLE_5, input, collidersFrom(layout));
+const hud = new Hud(document.body);
+const prompts = new Prompts(document.body);
 const panel = new DebugPanel(document.body);
 // Dev only: lets browser scripts (scripts/smoke.mjs) read the sim state
 if (import.meta.env.DEV) Object.assign(window, { __sim: { flight, input, view } });
 
-// Debug-only toggles: G keyboard feel, T gamepad throttle mode
+// Developer keys: F3 debug panel, G keyboard feel, T gamepad throttle mode
 window.addEventListener('keydown', (e) => {
+  if (e.code === 'F3') {
+    e.preventDefault();
+    panel.visible = !panel.visible;
+  }
   if (e.code === 'KeyG') {
     input.keyboard.feel = input.keyboard.feel === KEYBOARD_GENTLE ? KEYBOARD_NORMAL : KEYBOARD_GENTLE;
   }
@@ -51,6 +59,16 @@ window.addEventListener('keydown', (e) => {
     o.throttleMode = o.throttleMode === 'centerZero' ? 'fullRange' : 'centerZero';
   }
 });
+
+/** The persistent hint for the current situation, or '' for none. */
+function currentHint(): string {
+  const pad = input.active.kind === 'gamepad';
+  if (flight.respawnPrompt) return `Press ${pad ? 'B' : 'R'} to respawn`;
+  if (flight.drone.armed) return '';
+  return input.sticks.throttle > ARM_THROTTLE_LIMIT
+    ? `Lower the throttle (${pad ? 'left stick down' : 'S'}) to arm`
+    : `Press ${pad ? 'A' : 'Space'} to arm, then raise the throttle (${pad ? 'left stick' : 'hold W'})`;
+}
 
 const renderPos = new THREE.Vector3();
 const renderRot = new THREE.Quaternion();
@@ -63,10 +81,10 @@ renderer.setAnimationLoop((now) => {
   fps += (1 / Math.max(frameSeconds, 1e-3) - fps) * 0.05;
 
   const e = flight.frame(frameSeconds);
-  if (e.armBlocked) panel.flash('Arming blocked: lower the throttle first', now);
+  if (e.armBlocked) prompts.flash('Lower the throttle first', now, 1500);
   if (e.cameraToggle) view.toggle();
-  if (e.pause) panel.flash('Pause comes in stage 7', now, 1000);
-  if (e.crashed) panel.flash(`Crash (${e.impact.toFixed(1)} m/s)`, now, 1200);
+  if (e.pause) prompts.flash('Pause menu comes later', now, 1000);
+  if (e.crashed) prompts.flash('Crash!', now, 1000);
 
   const body = flight.drone.body;
   body.interpolate(flight.alpha, renderPos, renderRot);
@@ -76,34 +94,20 @@ renderer.setAnimationLoop((now) => {
   view.update(renderPos, renderRot, Math.min(frameSeconds, 0.1));
   field.follow(renderPos);
 
-  const pad = input.active.kind === 'gamepad';
-  let hint = '';
-  if (flight.respawnPrompt) {
-    hint = `Press ${pad ? 'B' : 'R'} to respawn`;
-  } else if (!flight.drone.armed) {
-    hint =
-      input.sticks.throttle > ARM_THROTTLE_LIMIT
-        ? `Lower the throttle (${pad ? 'left stick down' : 'S'}) to arm`
-        : `Press ${pad ? 'A' : 'Space'} to arm, then raise the throttle (${pad ? 'left stick' : 'hold W'})`;
-  }
-
-  panel.render(
-    {
-      hint,
-      sticks: input.sticks,
-      source: `Input: ${input.active.label}`,
-      armed: flight.drone.armed,
-      lines: [
-        `speed ${flight.speedKmh.toFixed(0)} km/h · alt ${flight.altitude.toFixed(1)} m · ${fps.toFixed(0)} fps`,
-        `ground: ${flight.drone.ground.state}`,
-        `camera: ${view.mode} (C) · keyboard: ${input.keyboard.feel === KEYBOARD_GENTLE ? 'gentle' : 'normal'} (G)`,
-        input.gamepad.connected
-          ? `gamepad throttle: ${input.gamepad.options.throttleMode} (T)`
-          : 'gamepad: press a button to connect',
-        'Space arm · W/S throttle · A/D yaw · arrows pitch/roll · R respawn',
-      ],
-    },
-    now,
-  );
+  hud.update(flight.speedKmh, flight.altitude);
+  prompts.update(currentHint(), now);
+  panel.render({
+    sticks: input.sticks,
+    source: `Input: ${input.active.label}`,
+    armed: flight.drone.armed,
+    lines: [
+      `${fps.toFixed(0)} fps · ground: ${flight.drone.ground.state} · last impact ${e.impact.toFixed(1)} m/s`,
+      `camera: ${view.mode} (C) · keyboard: ${input.keyboard.feel === KEYBOARD_GENTLE ? 'gentle' : 'normal'} (G)`,
+      input.gamepad.connected
+        ? `gamepad throttle: ${input.gamepad.options.throttleMode} (T)`
+        : 'gamepad: press a button to connect',
+      'Space arm · W/S throttle · A/D yaw · arrows pitch/roll · R respawn · F3 hide',
+    ],
+  });
   renderer.render(field.scene, view.camera);
 });

@@ -6,8 +6,6 @@ export interface DebugInfo {
   source: string;
   armed: boolean;
   lines: string[];
-  /** Persistent prompt in the middle of the screen (e.g. how to arm). Empty hides it. */
-  hint: string;
 }
 
 const CHANNELS = [
@@ -17,7 +15,7 @@ const CHANNELS = [
   { key: 'roll', label: 'ROL', centred: true },
 ] as const;
 
-/** Channel bars and status text for checking input. Not part of the final game UI. */
+/** Developer panel: channel bars and status text. Hidden by default; F3 toggles it. */
 export class DebugPanel {
   private readonly root = document.createElement('div');
   private readonly fills: HTMLElement[] = [];
@@ -25,12 +23,10 @@ export class DebugPanel {
   private readonly source = document.createElement('div');
   private readonly armed = document.createElement('div');
   private readonly info = document.createElement('div');
-  private readonly toast = document.createElement('div');
-  private readonly hint = document.createElement('div');
-  private toastUntil = 0;
 
   constructor(parent: HTMLElement) {
     this.root.className = 'debug-panel';
+    this.root.hidden = true;
     this.source.className = 'debug-source';
     this.armed.className = 'debug-armed';
     this.root.append(this.source, this.armed);
@@ -53,21 +49,19 @@ export class DebugPanel {
     }
     this.info.className = 'debug-info';
     this.root.append(this.info);
-    this.toast.className = 'debug-toast';
-    this.toast.hidden = true;
-    this.hint.className = 'debug-toast debug-hint';
-    this.hint.hidden = true;
-    parent.append(this.root, this.toast, this.hint);
+    parent.append(this.root);
   }
 
-  /** Shows a short message in the middle of the screen. */
-  flash(text: string, now: number, ms = 2500): void {
-    this.toast.textContent = text;
-    this.toast.hidden = false;
-    this.toastUntil = now + ms;
+  get visible(): boolean {
+    return !this.root.hidden;
   }
 
-  render(d: DebugInfo, now: number): void {
+  set visible(v: boolean) {
+    this.root.hidden = !v;
+  }
+
+  render(d: DebugInfo): void {
+    if (this.root.hidden) return;
     this.source.textContent = d.source;
     this.armed.textContent = d.armed ? 'ARMED' : 'DISARMED';
     this.armed.classList.toggle('on', d.armed);
@@ -85,9 +79,5 @@ export class DebugPanel {
       this.values[i]!.textContent = `${v >= 0 ? ' ' : ''}${v.toFixed(2)}`;
     });
     this.info.innerHTML = d.lines.map((l) => `<div>${l}</div>`).join('');
-    if (!this.toast.hidden && now > this.toastUntil) this.toast.hidden = true;
-    // A flash message takes the hint's place while it shows
-    this.hint.textContent = d.hint;
-    this.hint.hidden = !d.hint || !this.toast.hidden;
   }
 }

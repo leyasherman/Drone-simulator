@@ -21,6 +21,18 @@ the research in `sendline-main/docs/` or from PLAN.md.
 
 <!-- Entries below -->
 
+## D-014. HUD and first design tokens
+- Date: 2026-10-05
+- Stage: 7a
+- Status: accepted
+- Decision: HTML HUD over the canvas: speed (whole km/h) and altitude (0.1 m) top right, a fixed horizon marker
+  in the centre, as in the original layout. DOM is written only when the shown text changes.
+- Type: Saira Condensed (numbers, titles) and Saira (labels, body) from Google Fonts. Not the original's fonts.
+- Colours in ui/tokens.css: paper, ink, orange for actions, lime for rewards. Reused by menus in stage 7b.
+- Game prompts (arm hint, respawn hint, crash flash) moved out of the debug panel into ui/prompts.ts and styled
+  as cards. The debug panel is hidden by default; F3 toggles it.
+- Altitude is height above y = 0 (not above whatever is below), so it reads the same over boxes and ground.
+
 ## D-013. Collisions, ground states, crashes
 - Date: 2026-10-05
 - Stage: 5

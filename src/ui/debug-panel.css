@@ -74,25 +74,3 @@
   margin-top: 8px;
   color: #a9b8cf;
 }
-
-.debug-toast {
-  position: fixed;
-  left: 50%;
-  top: 40%;
-  transform: translate(-50%, -50%);
-  padding: 14px 22px;
-  border-radius: 14px;
-  background: #fff;
-  color: #0e1630;
-  font:
-    600 16px/1.3 system-ui,
-    sans-serif;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
-}
-
-.debug-hint {
-  top: auto;
-  bottom: 18%;
-  transform: translateX(-50%);
-  background: rgba(255, 255, 255, 0.92);
-}
