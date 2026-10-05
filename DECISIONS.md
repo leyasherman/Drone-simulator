@@ -21,6 +21,19 @@ the research in `sendline-main/docs/` or from PLAN.md.
 
 <!-- Entries below -->
 
+## D-018. Lesson list and local progress
+- Date: 2026-10-05
+- Stage: 10a
+- Status: accepted
+- Courses live in content/courses.json (ordered lesson ids), validated at load like lessons. Each lesson has an icon
+  name; the card diagrams are our own small SVGs.
+- Progress is local for now (localStorage key fpv.progress.v1, validated with Zod, falls back to memory when storage
+  is blocked, starts fresh on corrupt data). XP adds up on every completion, like a visit in the original.
+  Stage 12 moves it to Supabase with server-checked XP.
+- All lessons are open (no locks); the list selects the first lesson not done yet.
+- Completion card: Next lesson (when there is one), Try again, All lessons. The badge link is "← Lessons".
+- L opens the flight school from free flight until the main menu exists (7b).
+
 ## D-017. Lesson UI, demo clips, lesson flow
 - Date: 2026-10-05
 - Stage: 9b

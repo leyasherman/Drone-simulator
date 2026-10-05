@@ -7,8 +7,10 @@ export interface LessonUiHandlers {
   advance(): void;
   /** "Skip to practice" in the briefing. */
   skip(): void;
-  exit(): void;
+  /** "← Lessons" in the badge and "All lessons" on completion. */
+  lessons(): void;
   tryAgain(): void;
+  next(): void;
 }
 
 const esc = (s: string) =>
@@ -41,7 +43,7 @@ export class LessonUi {
     parent.append(this.root);
 
     this.badge.addEventListener('click', (e) => {
-      if ((e.target as HTMLElement).closest('[data-exit]')) on.exit();
+      if ((e.target as HTMLElement).closest('[data-exit]')) on.lessons();
       if ((e.target as HTMLElement).closest('[data-skip]')) on.skip();
     });
     this.bubble.addEventListener('click', () => this.briefing && on.advance());
@@ -52,7 +54,8 @@ export class LessonUi {
     this.complete.addEventListener('click', (e) => {
       const action = (e.target as HTMLElement).closest<HTMLElement>('[data-action]')?.dataset.action;
       if (action === 'again') on.tryAgain();
-      if (action === 'exit') on.exit();
+      if (action === 'lessons') on.lessons();
+      if (action === 'next') on.next();
     });
   }
 
@@ -66,7 +69,7 @@ export class LessonUi {
       <div class="lb-title">${esc(title)}</div>
       <div class="lb-links">
         ${canSkip ? '<button data-skip>Skip to practice</button>' : ''}
-        <button data-exit>← Exit</button>
+        <button data-exit>← Lessons</button>
       </div>`;
   }
 
@@ -105,11 +108,21 @@ export class LessonUi {
     setTimeout(() => chip.remove(), 1600);
   }
 
-  showComplete(o: { title: string; result: LessonResult }): void {
+  showComplete(o: { title: string; result: LessonResult; hasNext: boolean }): void {
     this.briefing = false;
     this.instructor.hidden = true;
     this.badge.innerHTML = '';
     const r = o.result;
+    const buttons = [
+      ...(o.hasNext ? [['next', 'Next lesson']] : []),
+      ['again', 'Try again'],
+      ['lessons', 'All lessons'],
+    ]
+      .map(
+        ([action, label], i) =>
+          `<button data-action="${action}" class="lc-btn ${i === 0 ? 'primary' : ''}"><span>0${i + 1}</span>${label}<i>↗</i></button>`,
+      )
+      .join('');
     this.complete.innerHTML = `
       <div class="lc-chip">Lesson complete</div>
       <h1>${esc(o.title)}</h1>
@@ -117,10 +130,7 @@ export class LessonUi {
         <div class="lc-xp-main">+${r.totalXp} XP</div>
         <div class="lc-xp-split">${r.flightXp} flight · ${r.bonusXp} bonus</div>
       </div>
-      <div class="lc-actions">
-        <button data-action="again" class="lc-btn"><span>01</span>Try again<i>↗</i></button>
-        <button data-action="exit" class="lc-btn primary"><span>02</span>Free flight<i>↗</i></button>
-      </div>`;
+      <div class="lc-actions">${buttons}</div>`;
     this.complete.hidden = false;
   }
 }

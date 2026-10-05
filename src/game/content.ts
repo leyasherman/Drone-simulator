@@ -1,5 +1,6 @@
 import { clipFromJson, type Clip } from '../sim/recording';
-import { parseLesson, type Lesson } from './lesson-schema';
+import coursesFile from '../../content/courses.json';
+import { coursesSchema, parseLesson, type Course, type Lesson } from './lesson-schema';
 
 /**
  * Lessons and demo clips bundled from content/. Validated once on load, so a broken file fails loudly.
@@ -25,6 +26,24 @@ for (const l of lessons.values()) {
   for (const s of l.steps) {
     if (s.demo && !clips.has(s.demo.clip)) throw new Error(`lesson ${l.id}: missing clip "${s.demo.clip}"`);
   }
+}
+
+const courses: Course[] = coursesSchema.parse(coursesFile);
+for (const c of courses) {
+  for (const id of c.lessons) if (!lessons.has(id)) throw new Error(`course ${c.id}: missing lesson "${id}"`);
+}
+
+export function allCourses(): Course[] {
+  return courses;
+}
+
+/** The lesson after this one in its course, if any. */
+export function nextLessonId(id: string): string | undefined {
+  for (const c of courses) {
+    const i = c.lessons.indexOf(id);
+    if (i >= 0) return c.lessons[i + 1];
+  }
+  return undefined;
 }
 
 export function getLesson(id: string): Lesson | undefined {

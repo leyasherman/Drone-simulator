@@ -15,7 +15,7 @@ Stack: TypeScript, Three.js, Vite, Vercel, Supabase. Free tiers only.
 Status: `[ ]` not started, `[~]` in progress, `[x]` done (criteria checked, committed).
 Rule: one stage at a time. After each stage, report and wait for approval.
 
-**Build order (agreed 2026-10-05):** 0, 1, 2a, 2b, 3, 4, 5, 7a, 8, 9a, 9b, 10, 11, 6, 7b, 12, 13.
+**Build order (agreed 2026-10-05):** 0, 1, 2a, 2b, 3, 4, 5, 7a, 8, 9a, 9b, 10a, 10b, 11, 6, 7b, 12, 13.
 Lessons come before the city map: they are what the client values most and they only need the training area.
 
 ---
@@ -96,9 +96,16 @@ Lesson UI (step badge, instructor bubble with a placeholder mascot, radio overla
 visuals, completion screen). Lesson 1 (takeoff) with our own texts and demo flights.
 **Done when:** lesson 1 runs from start to the completion screen in the browser.
 
-### Stage 10. Lesson list and courses `[ ]`
-Screen with course tabs, lesson cards, lesson panel, local progress. Course 1 (7 lessons) with our own texts.
-**Done when:** all 7 lessons of course 1 can be completed; progress shows and survives a reload.
+### Stage 10a. Lesson list and progress `[x]`
+Courses file, lesson list screen (course tabs with progress, lesson cards with status, lesson panel with Start),
+local progress (localStorage), completion screen with Next lesson / Try again / All lessons. L opens the list.
+**Done when:** the list shows lesson 1 and its status; finishing it marks it done and survives a reload;
+Next lesson / All lessons / Exit go where they say.
+
+### Stage 10b. Course 1: seven lessons `[ ]`
+A lesson lane on the field, an autopilot that flies any lesson's objectives, demo clips made by it,
+six more lessons with our own texts.
+**Done when:** a test flies every lesson's practice with the autopilot and completes it; all 7 lessons play in the browser.
 
 ### Stage 11. Lesson editor `[ ]`
 In-game editor: steps, instructor lines, recording the demo flight, placing gates and pads (gizmo, grid snap),

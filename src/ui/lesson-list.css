@@ -1,0 +1,288 @@
+.lesson-list {
+  position: fixed;
+  inset: 0;
+  padding: 20px clamp(16px, 3vw, 40px);
+  overflow: auto;
+  background: rgba(243, 241, 236, 0.94);
+  backdrop-filter: blur(6px);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+.lesson-list button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.ll-head {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.ll-brand {
+  font: 800 34px/1 var(--font-display);
+  text-transform: uppercase;
+}
+
+.ll-xp {
+  margin-left: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--card);
+}
+
+.ll-xp span {
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ll-xp b {
+  font: 800 20px/1 var(--font-display);
+}
+
+.ll-close {
+  padding: 10px 16px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  font-weight: 700 !important;
+}
+
+.ll-tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.ll-tab {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+  font: 800 24px/1 var(--font-display) !important;
+  text-transform: uppercase;
+}
+
+.ll-tab b {
+  font-size: 20px;
+}
+
+.ll-tab.on {
+  border: 2px solid var(--ink);
+  background: var(--action);
+  box-shadow: 0 3px 0 var(--ink);
+}
+
+.ll-body {
+  display: grid;
+  grid-template-columns: minmax(260px, 360px) 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.ll-panel {
+  position: sticky;
+  top: 0;
+  padding: 24px;
+  border-radius: 20px;
+  background: var(--ink);
+  color: #fff;
+}
+
+.ll-panel-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ll-panel-num {
+  font: 800 72px/1 var(--font-display);
+  color: var(--action);
+}
+
+.ll-panel-icon {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--paper);
+  display: grid;
+  place-items: center;
+}
+
+.ll-panel-icon .lesson-icon {
+  width: 90px;
+}
+
+.ll-panel h2 {
+  margin: 20px 0 10px;
+  font: 800 44px/0.95 var(--font-display);
+  text-transform: uppercase;
+}
+
+.ll-panel p {
+  margin: 0 0 22px;
+  color: #d6dbe5;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.ll-panel.empty h2 {
+  margin-top: 0;
+}
+
+.ll-start {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  background: var(--action);
+  color: var(--action-ink) !important;
+  box-shadow: 0 3px 0 #000;
+  font: 800 22px/1 var(--font-display) !important;
+  text-transform: uppercase;
+}
+
+.ll-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 14px;
+}
+
+.ll-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 210px;
+  padding: 16px 18px;
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  text-align: left;
+}
+
+.ll-card:hover {
+  border-color: var(--ink);
+}
+
+.ll-card.on {
+  border: 2px solid var(--action);
+  background: #fff4ea;
+}
+
+.ll-num {
+  font: 800 34px/1 var(--font-display);
+}
+
+.ll-card.on .ll-num {
+  color: var(--action);
+}
+
+.ll-tick {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--reward);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+}
+
+.ll-card .lesson-icon {
+  width: 90px;
+  margin: 8px auto;
+}
+
+.ll-title {
+  margin-top: auto;
+  font: 800 24px/1 var(--font-display);
+  text-transform: uppercase;
+}
+
+.ll-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.ll-status i {
+  position: relative;
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.ll-status u {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: #9ccc3a;
+}
+
+/* Lesson icon strokes */
+.lesson-icon .li-quad path,
+.lesson-icon .li-quad circle {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.lesson-icon .li-core {
+  fill: var(--action);
+}
+
+.lesson-icon .li-arrow {
+  fill: none;
+  stroke: var(--action);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.lesson-icon .li-head {
+  fill: var(--action);
+}
+
+.lesson-icon .li-dash {
+  fill: none;
+  stroke: var(--ink-soft);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 4;
+}
+
+.lesson-icon .li-ground {
+  fill: none;
+  stroke: var(--ink-soft);
+  stroke-width: 1.5;
+}
+
+.lesson-icon .li-flag {
+  fill: var(--action);
+}
+
+@media (max-width: 760px) {
+  .ll-body {
+    grid-template-columns: 1fr;
+  }
+  .ll-panel {
+    position: static;
+  }
+}

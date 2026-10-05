@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { getLesson } from './game/content';
+import { allCourses, getLesson, nextLessonId } from './game/content';
+import { Progress } from './game/progress';
 import { FreeFlight } from './game/free-flight';
 import { LessonSession } from './game/lesson-session';
 import { ARM_THROTTLE_LIMIT } from './input/arming';
@@ -10,6 +11,7 @@ import { FREESTYLE_5 } from './sim/profiles';
 import { ClipPlayer, Recorder, clipDuration, clipToJson, type ClipJson } from './sim/recording';
 import { DebugPanel } from './ui/debug-panel';
 import { Hud } from './ui/hud';
+import { LessonList } from './ui/lesson-list';
 import { LessonUi } from './ui/lesson-ui';
 import { Prompts } from './ui/prompts';
 import { RadioOverlay } from './ui/radio-overlay';
@@ -62,17 +64,43 @@ document.body.append(recBadge);
 let lesson: LessonSession | null = null;
 /** What the lesson UI currently shows, so it is rebuilt only when that changes. */
 let lessonUiKey = '';
+/** Set once a lesson's completion has been saved, so it is saved only once per run. */
+let completionSaved = false;
+const progress = new Progress();
 const lessonUi = new LessonUi(document.body, {
   advance: () => lesson?.advance(),
   skip: () => lesson?.skipToPractice(),
-  tryAgain: () => lesson?.tryAgain(),
-  exit: () => exitLesson(),
+  tryAgain: () => {
+    completionSaved = false;
+    lesson?.tryAgain();
+  },
+  lessons: () => openLessonList(lesson?.lesson.id),
+  next: () => {
+    const next = lesson && nextLessonId(lesson.lesson.id);
+    if (next) startLesson(next);
+  },
 });
+const lessonList = new LessonList(document.body, allCourses(), getLesson, progress, {
+  start: (id) => startLesson(id),
+  close: () => {
+    lessonList.close();
+    exitLesson();
+  },
+});
+
+/** Shows the flight school screen; the sim keeps drawing behind it. */
+function openLessonList(select?: string): void {
+  if (lesson) exitLesson();
+  if (bench !== 'live') cycleBenchTo('live');
+  lessonList.open(select);
+}
 
 function startLesson(id: string): void {
   const l = getLesson(id);
   if (!l) return;
   if (bench !== 'live') cycleBenchTo('live');
+  lessonList.close();
+  completionSaved = false;
   lesson?.end();
   lesson = new LessonSession(l, flight);
   lesson.start();
@@ -143,15 +171,17 @@ if (import.meta.env.DEV) {
       bench: () => bench,
       lesson: () => lesson,
       startLesson,
+      openLessonList,
+      progress,
     },
   });
 }
 
 window.addEventListener('keydown', (e) => {
   if (e.repeat) return;
-  // L: lesson 1 (until the lesson list exists, stage 10)
-  if (e.code === 'KeyL' && !lesson) startLesson('first-takeoff');
-  if (e.code === 'KeyP' && !lesson) cycleBench();
+  // L: flight school (until the main menu exists, stage 7b)
+  if (e.code === 'KeyL' && !lesson && !lessonList.visible) openLessonList();
+  if (e.code === 'KeyP' && !lesson && !lessonList.visible) cycleBench();
   // In playback the sim is paused, so the camera key is read here
   if (e.code === 'KeyC' && bench === 'playback') view.toggle();
   if (e.code === 'F3') {
@@ -170,8 +200,9 @@ window.addEventListener('keydown', (e) => {
 /** The persistent hint for the current situation, or '' for none. */
 function currentHint(): string {
   const pad = input.active.kind === 'gamepad';
+  if (lessonList.visible) return '';
   if (flight.respawnPrompt) return `Press ${pad ? 'B' : 'R'} to respawn`;
-  if (flight.drone.armed) return lesson ? '' : 'L: flight school, lesson 1';
+  if (flight.drone.armed) return lesson || lessonList.visible ? '' : 'L: flight school';
   return input.sticks.throttle > ARM_THROTTLE_LIMIT
     ? `Lower the throttle (${pad ? 'left stick down' : 'S'}) to arm`
     : `Press ${pad ? 'A' : 'Space'} to arm, then raise the throttle (${pad ? 'left stick' : 'hold W'})`;
@@ -250,7 +281,15 @@ function lessonFrame(l: LessonSession, frameSeconds: number, now: number, dt: nu
     if (l.phase === 'complete' && lessonUiKey !== 'c') {
       lessonUiKey = 'c';
       view.setMode('chase');
-      lessonUi.showComplete({ title: l.lesson.title, result: r.result });
+      if (!completionSaved) {
+        completionSaved = true;
+        progress.complete(l.lesson.id, r.result.totalXp);
+      }
+      lessonUi.showComplete({
+        title: l.lesson.title,
+        result: r.result,
+        hasNext: nextLessonId(l.lesson.id) !== undefined,
+      });
     }
     while (l.xpPops.length) lessonUi.xpPop(l.xpPops.shift()!);
     prompts.update(l.phase === 'practice' && flight.respawnPrompt ? currentHint() : '', now);

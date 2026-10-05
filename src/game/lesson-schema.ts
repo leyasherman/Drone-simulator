@@ -12,6 +12,9 @@ const vec3 = z.tuple([z.number(), z.number(), z.number()]);
 /** Mascot pose for a line. Only names; the art is ours. */
 export const POSES = ['wave', 'think', 'point', 'arms-crossed'] as const;
 
+/** Small diagram on the lesson card. */
+export const ICONS = ['takeoff', 'forward', 'angle', 'line', 'height', 'climb', 'run', 'bank'] as const;
+
 export const lineSchema = z.object({
   text: z.string().min(1).max(200),
   pose: z.enum(POSES).default('wave'),
@@ -57,6 +60,7 @@ export const lessonSchema = z
     title: z.string().min(1).max(60),
     /** One line shown on the lesson card. */
     summary: z.string().min(1).max(140),
+    icon: z.enum(ICONS).default('takeoff'),
     spawn: z.object({ position: vec3, yaw: z.number().default(0) }),
     steps: z.array(stepSchema).min(1),
     practice: z.object({
@@ -75,6 +79,15 @@ export type LessonStep = z.infer<typeof stepSchema>;
 export type Objective = z.infer<typeof objectiveSchema>;
 export type GateObjective = z.infer<typeof gateSchema>;
 export type LandObjective = z.infer<typeof landSchema>;
+
+/** A course is an ordered list of lessons. */
+export const courseSchema = z.object({
+  id: slug,
+  title: z.string().min(1).max(40),
+  lessons: z.array(slug),
+});
+export const coursesSchema = z.array(courseSchema).min(1);
+export type Course = z.infer<typeof courseSchema>;
 
 /** Validates lesson data. Throws a ZodError with readable paths on bad data. */
 export function parseLesson(data: unknown): Lesson {

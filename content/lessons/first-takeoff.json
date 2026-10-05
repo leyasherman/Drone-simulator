@@ -2,7 +2,15 @@
   "id": "first-takeoff",
   "title": "Lift Off",
   "summary": "Use the throttle to leave the pad, climb through the ring, and set it back down.",
-  "spawn": { "position": [2.5, 0, 2.5], "yaw": 0 },
+  "icon": "takeoff",
+  "spawn": {
+    "position": [
+      2.5,
+      0,
+      2.5
+    ],
+    "yaw": 0
+  },
   "steps": [
     {
       "id": "meet-throttle",
@@ -20,7 +28,10 @@
           "pose": "think"
         }
       ],
-      "demo": { "clip": "takeoff-hover", "camera": "chase" }
+      "demo": {
+        "clip": "takeoff-hover",
+        "camera": "chase"
+      }
     },
     {
       "id": "clean-takeoff",
@@ -34,14 +45,43 @@
           "pose": "arms-crossed"
         }
       ],
-      "demo": { "clip": "takeoff-hover", "camera": "fpv" }
+      "demo": {
+        "clip": "takeoff-hover",
+        "camera": "fpv"
+      }
     }
   ],
   "practice": {
     "instruction": "Left stick only: take off, climb up through the ring, then land back on the pad.",
     "objectives": [
-      { "kind": "gate", "id": "ring", "position": [2.5, 4, 2.5], "rotation": [90, 0, 0], "size": [3, 3] },
-      { "kind": "land", "id": "pad", "position": [2.5, 0, 2.5], "radius": 1.2 }
+      {
+        "kind": "gate",
+        "id": "ring",
+        "position": [
+          2.5,
+          4,
+          2.5
+        ],
+        "rotation": [
+          90,
+          0,
+          0
+        ],
+        "size": [
+          3,
+          3
+        ]
+      },
+      {
+        "kind": "land",
+        "id": "pad",
+        "position": [
+          2.5,
+          0,
+          2.5
+        ],
+        "radius": 1.2
+      }
     ]
   }
 }

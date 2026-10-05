@@ -1,0 +1,4 @@
+[
+  { "id": "first-flight", "title": "First Flight", "lessons": ["first-takeoff"] },
+  { "id": "banking", "title": "Banking", "lessons": [] }
+]
