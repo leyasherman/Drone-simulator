@@ -8,6 +8,8 @@ import { FREESTYLE_5 } from './sim/profiles';
 import { DebugPanel } from './ui/debug-panel';
 import { Hud } from './ui/hud';
 import { Prompts } from './ui/prompts';
+import { RadioOverlay } from './ui/radio-overlay';
+import { ClipPlayer, Recorder, clipDuration, clipToJson, type ClipJson } from './sim/recording';
 import { DroneModel } from './world/drone-model';
 import { createTestField } from './world/test-field';
 import { collidersFrom, testFieldLayout } from './world/test-field-layout';
@@ -42,11 +44,50 @@ const flight = new FreeFlight(FREESTYLE_5, input, collidersFrom(layout));
 const hud = new Hud(document.body);
 const prompts = new Prompts(document.body);
 const panel = new DebugPanel(document.body);
-// Dev only: lets browser scripts (scripts/smoke.mjs) read the sim state
-if (import.meta.env.DEV) Object.assign(window, { __sim: { flight, input, view } });
+const radio = new RadioOverlay(document.body);
+const recBadge = document.createElement('div');
+recBadge.className = 'rec-badge';
+recBadge.hidden = true;
+document.body.append(recBadge);
 
-// Developer keys: F3 debug panel, G keyboard feel, T gamepad throttle mode
+// Recording bench (stage 8): P starts recording, P again plays it back in a loop, P again returns to flying
+type BenchMode = 'live' | 'recording' | 'playback';
+let mode: BenchMode = 'live';
+let player: ClipPlayer | null = null;
+let lastClip: ClipJson | null = null;
+
+function cycleBench(): void {
+  if (mode === 'live') {
+    flight.recorder = new Recorder(90);
+    mode = 'recording';
+  } else if (mode === 'recording') {
+    const clip = flight.recorder!.toClip();
+    flight.recorder = null;
+    lastClip = clipToJson(clip);
+    console.info(
+      `Recorded ${lastClip.frames.length} frames (${clipDuration(clip).toFixed(1)} s). window.__sim.lastClip()`,
+    );
+    player = new ClipPlayer(clip, true);
+    mode = 'playback';
+  } else {
+    player = null;
+    mode = 'live';
+    flight.clock.reset(); // do not catch up the paused time
+  }
+  recBadge.hidden = mode === 'live';
+  recBadge.classList.toggle('recording', mode === 'recording');
+  recBadge.textContent = mode === 'recording' ? 'REC  ·  P to stop' : 'PLAYBACK  ·  P to fly';
+  radio.visible = mode !== 'live';
+}
+
+// Dev only: lets browser scripts (scripts/smoke.mjs) read the sim state
+if (import.meta.env.DEV) {
+  Object.assign(window, { __sim: { flight, input, view, lastClip: () => lastClip, bench: () => mode } });
+}
+
+// Developer keys: F3 debug panel, G keyboard feel, T gamepad throttle mode, P record/playback
 window.addEventListener('keydown', (e) => {
+  if (e.code === 'KeyP' && !e.repeat) cycleBench();
   if (e.code === 'F3') {
     e.preventDefault();
     panel.visible = !panel.visible;
@@ -72,6 +113,7 @@ function currentHint(): string {
 
 const renderPos = new THREE.Vector3();
 const renderRot = new THREE.Quaternion();
+const prevRenderPos = new THREE.Vector3();
 let last = performance.now();
 let fps = 60;
 
@@ -79,34 +121,51 @@ renderer.setAnimationLoop((now) => {
   const frameSeconds = (now - last) / 1000;
   last = now;
   fps += (1 / Math.max(frameSeconds, 1e-3) - fps) * 0.05;
+  const dt = Math.min(frameSeconds, 0.1);
+  let impact = 0;
 
-  const e = flight.frame(frameSeconds);
-  if (e.armBlocked) prompts.flash('Lower the throttle first', now, 1500);
-  if (e.cameraToggle) view.toggle();
-  if (e.pause) prompts.flash('Pause menu comes later', now, 1000);
-  if (e.crashed) prompts.flash('Crash!', now, 1000);
+  if (player) {
+    // Playback: the sim is paused, the clip drives the drone, camera and radio
+    const s = player.update(dt);
+    prevRenderPos.copy(renderPos);
+    renderPos.copy(s.position);
+    renderRot.copy(s.orientation);
+    model.update(s.motors, dt);
+    radio.update(s.sticks);
+    hud.update(
+      (renderPos.distanceTo(prevRenderPos) / Math.max(dt, 1e-3)) * 3.6,
+      renderPos.y - flight.drone.profile.size.y / 2,
+    );
+    prompts.update('', now);
+  } else {
+    const e = flight.frame(frameSeconds);
+    impact = e.impact;
+    if (e.armBlocked) prompts.flash('Lower the throttle first', now, 1500);
+    if (e.cameraToggle) view.toggle();
+    if (e.pause) prompts.flash('Pause menu comes later', now, 1000);
+    if (e.crashed) prompts.flash('Crash!', now, 1000);
+    flight.drone.body.interpolate(flight.alpha, renderPos, renderRot);
+    model.update(flight.drone.quad.motors, dt);
+    radio.update(input.sticks);
+    hud.update(flight.speedKmh, flight.altitude);
+    prompts.update(currentHint(), now);
+  }
 
-  const body = flight.drone.body;
-  body.interpolate(flight.alpha, renderPos, renderRot);
   model.root.position.copy(renderPos);
   model.root.quaternion.copy(renderRot);
-  model.update(flight.drone.quad.motors, Math.min(frameSeconds, 0.1));
-  view.update(renderPos, renderRot, Math.min(frameSeconds, 0.1));
+  view.update(renderPos, renderRot, dt);
   field.follow(renderPos);
-
-  hud.update(flight.speedKmh, flight.altitude);
-  prompts.update(currentHint(), now);
   panel.render({
     sticks: input.sticks,
     source: `Input: ${input.active.label}`,
     armed: flight.drone.armed,
     lines: [
-      `${fps.toFixed(0)} fps · ground: ${flight.drone.ground.state} · last impact ${e.impact.toFixed(1)} m/s`,
+      `${fps.toFixed(0)} fps · ground: ${flight.drone.ground.state} · last impact ${impact.toFixed(1)} m/s`,
       `camera: ${view.mode} (C) · keyboard: ${input.keyboard.feel === KEYBOARD_GENTLE ? 'gentle' : 'normal'} (G)`,
       input.gamepad.connected
         ? `gamepad throttle: ${input.gamepad.options.throttleMode} (T)`
         : 'gamepad: press a button to connect',
-      'Space arm · W/S throttle · A/D yaw · arrows pitch/roll · R respawn · F3 hide',
+      'Space arm · W/S throttle · A/D yaw · arrows pitch/roll · R respawn · P record · F3 hide',
     ],
   });
   renderer.render(field.scene, view.camera);

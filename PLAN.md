@@ -79,7 +79,7 @@ FOV/uptilt, graphics), main menu (Free flight, Flight school). SVG placeholder m
 
 ## Lessons
 
-### Stage 8. Recording and playing back flights `[ ]`
+### Stage 8. Recording and playing back flights `[x]`
 Recorder for poses and sticks at 60 Hz, player with interpolation (lerp/slerp), serialisation.
 **Done when:** tests pass: playback stays within 1 mm of the original path; in the browser a recorded flight
 plays with the FPV camera and live sticks on the overlay.

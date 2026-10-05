@@ -6,6 +6,7 @@ import type { BoxCollider } from '../sim/collision';
 import { PHYSICS_DT } from '../sim/constants';
 import { Drone } from '../sim/drone';
 import type { DroneProfile } from '../sim/profiles';
+import type { Recorder } from '../sim/recording';
 
 /** Impact speeds into a surface, m/s. Values from the research prototype; tune by feel. */
 export const IMPACT_LIGHT = 0.5;
@@ -49,6 +50,8 @@ export class FreeFlight {
   alpha = 0;
   /** Seconds since the last respawn. */
   flightTime = 0;
+  /** When set, every physics step is recorded into it. */
+  recorder: Recorder | null = null;
 
   constructor(
     profile: DroneProfile,
@@ -107,6 +110,7 @@ export class FreeFlight {
 
     d.step(input.sticks, PHYSICS_DT);
     this.flightTime += PHYSICS_DT;
+    this.recorder?.record(d.body, input.sticks, d.quad.motors);
 
     const c = d.contact;
     if (c.impactSpeed > IMPACT_LIGHT) e.impact = Math.max(e.impact, c.impactSpeed);

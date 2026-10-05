@@ -21,6 +21,21 @@ the research in `sendline-main/docs/` or from PLAN.md.
 
 <!-- Entries below -->
 
+## D-015. Flight recordings
+- Date: 2026-10-05
+- Stage: 8
+- Status: accepted
+- Decision: record poses, not only inputs. A frame is 16 floats (time, position, rotation, 4 sticks, 4 motors)
+  at 60 Hz in a preallocated ring buffer (default 90 s). Playback: binary search, lerp, slerp for rotation.
+  Within 1 mm of the true 240 Hz path in tests.
+- Why poses: a demo flight must look the same after we retune physics; inputs replayed through new physics would
+  drift. Sticks are stored too, for the radio overlay and later checks.
+- JSON for lesson files: {format: 1, rate, frames: [[16 numbers], ...]}, rounded (0.1 mm, 1e-5 rotation),
+  validated with Zod. About 6 KB per second of flight; fine for lesson demos. Switch to compressed binary
+  if clips get long (replays).
+- Radio overlay: our own outline (rounded body, square gimbal wells, small screen), Mode 2 dots. Used by lessons next.
+- Dev bench: P records, P plays back in a loop (sim paused), P returns to flying; window.__sim.lastClip() gives the JSON.
+
 ## D-014. HUD and first design tokens
 - Date: 2026-10-05
 - Stage: 7a

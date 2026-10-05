@@ -1,0 +1,68 @@
+.radio-overlay {
+  position: fixed;
+  right: 28px;
+  bottom: 24px;
+  width: min(300px, 32vw);
+  pointer-events: none;
+  user-select: none;
+}
+
+.radio-overlay svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.ro-line {
+  fill: rgba(255, 255, 255, 0.08);
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 1px 1px rgba(17, 23, 34, 0.35));
+}
+
+.ro-cross {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.4);
+  stroke-width: 1.5;
+}
+
+.ro-stem {
+  stroke: rgba(255, 255, 255, 0.85);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.ro-dot {
+  fill: var(--action);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.rec-badge {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 14px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  color: var(--ink);
+  font: 800 18px/1 var(--font-display);
+  letter-spacing: 0.06em;
+  pointer-events: none;
+}
+
+.rec-badge.recording::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: #e5342b;
+  vertical-align: 1px;
+}
