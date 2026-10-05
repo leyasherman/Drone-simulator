@@ -6,7 +6,7 @@
     },
     "vercel": {
       "type": "http",
-      "url": "https://mcp.vercel.com"
+      "url": "https://mcp.vercel.com/fly-3beb/drone-simulator"
     }
   }
 }
