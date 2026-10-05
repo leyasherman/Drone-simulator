@@ -55,6 +55,7 @@ type BenchMode = 'live' | 'recording' | 'playback';
 let mode: BenchMode = 'live';
 let player: ClipPlayer | null = null;
 let lastClip: ClipJson | null = null;
+let cameraBeforePlayback = view.mode;
 
 function cycleBench(): void {
   if (mode === 'live') {
@@ -68,15 +69,19 @@ function cycleBench(): void {
       `Recorded ${lastClip.frames.length} frames (${clipDuration(clip).toFixed(1)} s). window.__sim.lastClip()`,
     );
     player = new ClipPlayer(clip, true);
+    // Watch from behind by default, so the flight is easy to see; C switches to FPV
+    cameraBeforePlayback = view.mode;
+    if (view.mode !== 'chase') view.toggle();
     mode = 'playback';
   } else {
     player = null;
+    if (view.mode !== cameraBeforePlayback) view.toggle();
     mode = 'live';
     flight.clock.reset(); // do not catch up the paused time
   }
   recBadge.hidden = mode === 'live';
   recBadge.classList.toggle('recording', mode === 'recording');
-  recBadge.textContent = mode === 'recording' ? 'REC  ·  P to stop' : 'PLAYBACK  ·  P to fly';
+  if (mode === 'recording') recBadge.textContent = 'REC  ·  P to stop';
   radio.visible = mode !== 'live';
 }
 
@@ -88,6 +93,8 @@ if (import.meta.env.DEV) {
 // Developer keys: F3 debug panel, G keyboard feel, T gamepad throttle mode, P record/playback
 window.addEventListener('keydown', (e) => {
   if (e.code === 'KeyP' && !e.repeat) cycleBench();
+  // In playback the sim is paused, so the camera key is read here
+  if (e.code === 'KeyC' && mode === 'playback') view.toggle();
   if (e.code === 'F3') {
     e.preventDefault();
     panel.visible = !panel.visible;
@@ -127,6 +134,8 @@ renderer.setAnimationLoop((now) => {
   if (player) {
     // Playback: the sim is paused, the clip drives the drone, camera and radio
     const s = player.update(dt);
+    const total = clipDuration(player.clip);
+    recBadge.textContent = `PLAYBACK  ${player.time.toFixed(1)} / ${total.toFixed(1)} s  ·  C camera  ·  P to fly`;
     prevRenderPos.copy(renderPos);
     renderPos.copy(s.position);
     renderRot.copy(s.orientation);
@@ -151,6 +160,7 @@ renderer.setAnimationLoop((now) => {
     prompts.update(currentHint(), now);
   }
 
+  hud.markerVisible = view.mode === 'fpv';
   model.root.position.copy(renderPos);
   model.root.quaternion.copy(renderRot);
   view.update(renderPos, renderRot, dt);

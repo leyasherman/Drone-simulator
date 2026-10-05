@@ -16,6 +16,7 @@ export class Hud {
   private readonly root = document.createElement('div');
   private readonly speed: HTMLElement;
   private readonly altitude: HTMLElement;
+  private readonly marker: HTMLElement;
   private lastSpeed = '';
   private lastAltitude = '';
 
@@ -36,11 +37,17 @@ export class Hud {
       <div class="hud-marker">${MARKER_SVG}</div>`;
     this.speed = this.root.querySelector('[data-speed]')!;
     this.altitude = this.root.querySelector('[data-altitude]')!;
+    this.marker = this.root.querySelector('.hud-marker')!;
     parent.append(this.root);
   }
 
   set visible(v: boolean) {
     this.root.hidden = !v;
+  }
+
+  /** The horizon marker only makes sense from the drone's own camera. */
+  set markerVisible(v: boolean) {
+    this.marker.hidden = !v;
   }
 
   /** Writes the DOM only when the shown text changes. */
