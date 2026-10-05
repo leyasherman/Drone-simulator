@@ -21,6 +21,23 @@ the research in `sendline-main/docs/` or from PLAN.md.
 
 <!-- Entries below -->
 
+## D-016. Lesson format and logic
+- Date: 2026-10-05
+- Stage: 9a
+- Status: accepted
+- Format (Zod, lesson-schema.ts): id, title, summary, spawn, steps [{id, lines [{text, pose}], demo {clip, camera}}],
+  practice {instruction, objectives [gate | land]}. Demo clips live in content/clips/<id>.json and are referenced
+  by id, so several steps or lessons can share one. Mascot poses are names only (wave, think, point, arms-crossed).
+- Gate: passed when the path crosses the opening from the front (local +z) to the back, tested on the segment
+  between physics steps. A flat ring you climb through is a gate rotated 90° about x.
+- Landing: after being airborne, inside the pad radius, resting upright, under 0.4 m/s, for 0.6 s (research values).
+  After a gate the quad is airborne, so a landing right after it counts.
+- Objectives must be done in order. +10 flight XP per gate, +30 on completion (server-checked in stage 12).
+- Practice keeps done objectives across a respawn (matches the original: no fail screen, R and carry on).
+- LessonRunner has no DOM: advance() on click, update() every physics step. An end-to-end test flies lesson 1
+  with the real physics and a scripted pilot, so a lesson that cannot be completed fails the build.
+- Lesson 1 texts and title are ours ("Lift Off"); the structure follows what the original teaches first.
+
 ## D-015. Flight recordings
 - Date: 2026-10-05
 - Stage: 8

@@ -1,0 +1,47 @@
+{
+  "id": "first-takeoff",
+  "title": "Lift Off",
+  "summary": "Use the throttle to leave the pad, climb through the ring, and set it back down.",
+  "spawn": { "position": [2.5, 0, 2.5], "yaw": 0 },
+  "steps": [
+    {
+      "id": "meet-throttle",
+      "lines": [
+        {
+          "text": "Let's start with the left stick. Pushing it up and down sets how hard the motors spin.",
+          "pose": "wave"
+        },
+        {
+          "text": "More throttle, more lift. Watch the left stick on the radio while I go up.",
+          "pose": "point"
+        },
+        {
+          "text": "Somewhere in the middle there's a point where the quad just floats. That's your hover.",
+          "pose": "think"
+        }
+      ],
+      "demo": { "clip": "takeoff-hover", "camera": "chase" }
+    },
+    {
+      "id": "clean-takeoff",
+      "lines": [
+        {
+          "text": "A clean takeoff: one firm push to get clear of the ground, then ease off.",
+          "pose": "point"
+        },
+        {
+          "text": "Hold too much and you'll shoot up. Too little and you'll sink. Small corrections win.",
+          "pose": "arms-crossed"
+        }
+      ],
+      "demo": { "clip": "takeoff-hover", "camera": "fpv" }
+    }
+  ],
+  "practice": {
+    "instruction": "Left stick only: take off, climb up through the ring, then land back on the pad.",
+    "objectives": [
+      { "kind": "gate", "id": "ring", "position": [2.5, 4, 2.5], "rotation": [90, 0, 0], "size": [3, 3] },
+      { "kind": "land", "id": "pad", "position": [2.5, 0, 2.5], "radius": 1.2 }
+    ]
+  }
+}

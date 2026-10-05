@@ -15,7 +15,7 @@ Stack: TypeScript, Three.js, Vite, Vercel, Supabase. Free tiers only.
 Status: `[ ]` not started, `[~]` in progress, `[x]` done (criteria checked, committed).
 Rule: one stage at a time. After each stage, report and wait for approval.
 
-**Build order (agreed 2026-10-05):** 0, 1, 2a, 2b, 3, 4, 5, 7a, 8, 9, 10, 11, 6, 7b, 12, 13.
+**Build order (agreed 2026-10-05):** 0, 1, 2a, 2b, 3, 4, 5, 7a, 8, 9a, 9b, 10, 11, 6, 7b, 12, 13.
 Lessons come before the city map: they are what the client values most and they only need the training area.
 
 ---
@@ -84,11 +84,17 @@ Recorder for poses and sticks at 60 Hz, player with interpolation (lerp/slerp), 
 **Done when:** tests pass: playback stays within 1 mm of the original path; in the browser a recorded flight
 plays with the FPV camera and live sticks on the overlay.
 
-### Stage 9. Lesson engine `[ ]`
-Lesson format (Zod), steps (instructor lines + demo + camera), practice (gates, landing pads), gate and landing
-checks, lesson UI (step badge, mascot speech bubble, radio outline, "+XP" per gate), completion screen.
-Lessons load from `content/lessons/`.
-**Done when:** lesson 1 (takeoff) runs from start to the completion screen; gate and landing tests pass.
+### Stage 9a. Lesson format and logic `[x]`
+Lesson format (Zod): steps (instructor lines + demo + camera), practice (gates, landing pads).
+Gate crossing and landing checks, a lesson runner (briefing → practice → complete) with no UI.
+**Done when:** tests pass: schema accepts a good lesson and rejects bad ones; gate crossing (front to back,
+inside the opening, fast segments); landing (after being airborne, inside the radius, upright, slow for 0.6 s);
+the runner walks lines and steps, counts gates in order, gives +10 XP per gate and completes.
+
+### Stage 9b. Lesson UI and lesson 1 `[ ]`
+Lesson UI (step badge, instructor bubble with a placeholder mascot, radio overlay, "+XP" per gate, gate and pad
+visuals, completion screen). Lesson 1 (takeoff) with our own texts and demo flights.
+**Done when:** lesson 1 runs from start to the completion screen in the browser.
 
 ### Stage 10. Lesson list and courses `[ ]`
 Screen with course tabs, lesson cards, lesson panel, local progress. Course 1 (7 lessons) with our own texts.
