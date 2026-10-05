@@ -15,7 +15,8 @@ Stack: TypeScript, Three.js, Vite, Vercel, Supabase. Free tiers only.
 Status: `[ ]` not started, `[~]` in progress, `[x]` done (criteria checked, committed).
 Rule: one stage at a time. After each stage, report and wait for approval.
 
-**Build order (agreed 2026-10-05):** 0, 1, 2a, 2b, 3, 4, 5, 7a, 8, 9a, 9b, 10a, 10b, 7b, 11, 6, 12, 13.
+**Build order (agreed 2026-10-05):** 0, 1, 2a, 2b, 3, 4, 5, 7a, 8, 9a, 9b, 10a, 10b, 7b, 12a, 12b, 11, 6, 13.
+12 moved before 11 (2026-10-05): the client asked for login with Supabase.
 7b moved before 11 (2026-10-05): without a start menu and an intro, a new player cannot find the lessons.
 Lessons come before the city map: they are what the client values most and they only need the training area.
 
@@ -117,10 +118,18 @@ preview, JSON export/import.
 
 ## Data and release
 
-### Stage 12. Supabase `[ ]`
-Anonymous sign-in, nickname, profile (XP, level, lesson progress), lessons in the database, saving from the editor
-(author role), RLS.
-**Done when:** progress carries over to another browser after email sign-in; players cannot change lessons or XP directly.
+### Stage 12a. Supabase: accounts and progress in the database `[~]`
+Tables profiles and lesson_completions with RLS; XP and completions written only through RPC functions that check
+and cap them. A silent anonymous account on the first visit. Progress loads from and saves to Supabase
+(local copy as offline fallback). Supabase URL and publishable key set in Vercel.
+**Done when:** a new browser gets an account without a form; finishing a lesson shows up in the database and
+survives a reload; a direct update of XP from the client is refused; Supabase advisors report no security issues;
+the live site saves progress too.
+
+### Stage 12b. Account screen: email and password `[ ]`
+Create an account (turns the anonymous one into a permanent one, progress kept), sign in, sign out, nickname.
+**Done when:** progress made anonymously survives signing up; signing in from another browser shows the same
+progress; a bad password or a taken email shows a clear message.
 
 ### Stage 13. Sound, polish, deploy `[ ]`
 Motor sound from RPM, camera effects, Low/Medium/High quality, course 2, deploy to Vercel.

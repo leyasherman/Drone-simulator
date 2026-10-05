@@ -4,6 +4,8 @@ import { allCourses, getLesson, nextLessonId } from './game/content';
 import { FreeFlight } from './game/free-flight';
 import { LessonSession } from './game/lesson-session';
 import { Progress, browserStore } from './game/progress';
+import { ProgressSync, supabaseBackend } from './net/progress-sync';
+import { ensureSession, supabase } from './net/supabase';
 import { loadSettings, saveSettings, type Settings } from './game/settings';
 import { ARM_THROTTLE_LIMIT } from './input/arming';
 import { InputManager } from './input/input';
@@ -29,7 +31,7 @@ if (!canvas) throw new Error('Canvas #scene not found');
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFShadowMap; // PCFSoftShadowMap was removed in three r186
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
 const params = new URLSearchParams(location.search);
@@ -55,6 +57,9 @@ const input = new InputManager();
 input.keyboard.attach(window);
 const flight = new FreeFlight(FREESTYLE_5, input, collidersFrom(layout));
 const progress = new Progress(store);
+// Progress lives in Supabase once signed in (silently, anonymously on the first visit); local copy otherwise
+const sync = supabase ? new ProgressSync(progress, supabaseBackend(supabase)) : null;
+void ensureSession().then((uid) => (uid && sync ? sync.start() : undefined));
 const hud = new Hud(document.body);
 const radio = new RadioOverlay(document.body);
 const prompts = new Prompts(document.body);
@@ -304,6 +309,8 @@ if (import.meta.env.DEV) {
       input,
       view,
       progress,
+      sync,
+      supabase,
       lastClip: () => lastClip,
       bench: () => bench,
       lesson: () => lesson,
@@ -415,7 +422,8 @@ function lessonFrame(l: LessonSession, frameSeconds: number, now: number, dt: nu
       view.setMode('chase');
       if (!completionSaved) {
         completionSaved = true;
-        progress.complete(l.lesson.id, r.result.totalXp);
+        if (sync) void sync.complete(l.lesson.id, r.result.flightXp, r.result.totalXp);
+        else progress.complete(l.lesson.id, r.result.totalXp);
       }
       lessonUi.showComplete({
         title: l.lesson.title,

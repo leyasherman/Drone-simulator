@@ -69,6 +69,23 @@ export class Progress {
     this.save();
   }
 
+  /** A copy of everything, e.g. to compare with the server. */
+  snapshot(): ProgressData {
+    return structuredClone(this.data);
+  }
+
+  /** Replaces local progress with the server's (the server is the source of truth once signed in). */
+  replace(data: ProgressData): void {
+    this.data = structuredClone(data);
+    this.save();
+  }
+
+  /** Corrects the total after the server has decided the award. */
+  setTotalXp(xp: number): void {
+    this.data.totalXp = xp;
+    this.save();
+  }
+
   /** How many of these lessons are done. */
   countDone(lessonIds: readonly string[]): number {
     return lessonIds.filter((id) => this.isDone(id)).length;

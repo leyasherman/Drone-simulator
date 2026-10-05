@@ -21,6 +21,28 @@ the research in `sendline-main/docs/` or from PLAN.md.
 
 <!-- Entries below -->
 
+## D-022. Accounts and progress in Supabase
+- Date: 2026-10-05
+- Stage: 12a
+- Status: accepted
+- Sign-in: a silent anonymous account on the first visit (no form). Email + password comes in 12b, with
+  "Confirm email" off for now: Supabase's built-in mailer only sends to project members and a few per hour,
+  and a real mailer (e.g. Resend + a domain) is extra setup. Revisit before a public launch, with CAPTCHA for
+  anonymous sign-ins.
+- Tables: profiles (nickname, xp) and lesson_completions (best_xp, completions, timestamps). RLS on both, read your
+  own rows only, no write policies. New tables are not auto-exposed in this project, so grants are explicit.
+- XP only through complete_lesson() (security definer, fixed search_path): flight XP capped at 200, +30 bonus,
+  nothing for a repeat within 15 s, lesson id format checked. The server does not know lesson contents yet, so it
+  cannot check that a lesson really has that many gates; the caps limit abuse.
+- A trigger creates a profile (pilot_xxxxxx) for every new auth user.
+- Client: the server is the source of truth once signed in. Local progress shows results at once and is corrected
+  by the server's total. Lessons finished before the backend existed are uploaded once. Without a backend
+  (no env vars, offline) the game keeps working on local progress.
+- Keys: the browser gets the URL and the publishable key (sb_publishable_…), public by design.
+- Advisors: the only warning left is that signed-in users can call complete_lesson, which is intended.
+  Supabase's own rls_auto_enable() helper was callable by anyone; execute revoked.
+- scripts/check-supabase.mjs checks the live rules with throwaway anonymous users (10 checks, all pass).
+
 ## D-021. Early deploy to Vercel
 - Date: 2026-10-05
 - Status: accepted
