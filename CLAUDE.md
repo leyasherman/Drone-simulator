@@ -72,5 +72,6 @@ sendline-main/     reference prototype and research (read only, not in git, not 
    by tests and which by hand. Say plainly what was not checked.
 3. **Update:** mark the stage `[x]` in PLAN.md, add the stage's decisions to DECISIONS.md.
 4. **Commit:** one commit per stage, message `stage N: short description`. No `--no-verify`.
+   No `Co-Authored-By` trailer or any other AI attribution in commits (the user's rule).
 5. **Report and wait:** short summary of what was done, how it was checked, what is left or risky.
    Do not start the next stage without the user's approval.
