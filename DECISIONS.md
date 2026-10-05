@@ -77,7 +77,9 @@ the research in `sendline-main/docs/` or from PLAN.md.
   from browser wiring, so it is unit-tested.
 - Keyboard: W/S throttle (holds when released), A/D yaw, arrows pitch/roll, Space arm, R respawn, C camera, Esc pause.
   Two feels: normal (research values: ±60%, ramp 4/s out, 6/s back, throttle 90%/s) and gentle
-  (±30% tilt, ±40% yaw, 2/s out, throttle 50%/s). Normal is the default: the user found the original sharper
+  (±30% tilt, ±40% yaw, 2/s out, throttle 50%/s up, 30%/s down).
+  Update 2026-10-05: S lowers throttle at 40%/s (W stays at 90%/s). At 90%/s a short tap dropped the quad
+  well below hover and it fell hard; the user found that wrong. Normal is the default: the user found the original sharper
   than gentle and wants it to match. Gentle stays as a setting for beginners.
 - Gamepad (standard mapping, Mode 2): left stick throttle + yaw, right stick pitch + roll; deadband 5%.
   Throttle mode 'centerZero' (research default) or 'fullRange'. Buttons: A arm, B respawn, Y camera, Start pause.

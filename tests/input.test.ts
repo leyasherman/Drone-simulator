@@ -73,6 +73,13 @@ describe('KeyboardInput', () => {
     expect(step(k, 1).throttle).toBeCloseTo(0.45, 2);
   });
 
+  it('S lowers throttle slower than W raises it (40%/s)', () => {
+    const k = kb();
+    k.setThrottle(0.5);
+    k.keyDown('KeyS');
+    expect(step(k, 0.25).throttle).toBeCloseTo(0.4, 2);
+  });
+
   it('arrow ramps roll to 60% in 0.15 s and returns to centre at 6/s', () => {
     const k = kb();
     k.keyDown('ArrowRight');
