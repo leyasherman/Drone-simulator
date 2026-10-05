@@ -98,6 +98,16 @@ function seeded(seed: number): () => number {
   };
 }
 
+/**
+ * Flat markings lying on the ground (lane, kerbs). Pulled toward the camera in the depth test, so they do not
+ * flicker against the ground plane at a distance (z-fighting). Higher level = drawn over lower ones.
+ */
+const DECAL = (level: number) => ({
+  polygonOffset: true,
+  polygonOffsetFactor: -level,
+  polygonOffsetUnits: -level,
+});
+
 /** Builds the scene for a layout from test-field-layout.ts. */
 export function createTestField(layout: readonly BoxSpec[]): TestField {
   const scene = new THREE.Scene();
@@ -149,15 +159,15 @@ export function createTestField(layout: readonly BoxSpec[]): TestField {
   const laneZ = (LANE.zStart + LANE.zEnd) / 2;
   const lane = new THREE.Mesh(
     new THREE.PlaneGeometry(LANE.halfWidth * 2, laneLen),
-    new THREE.MeshStandardMaterial({ color: 0x46557a, roughness: 0.95 }),
+    new THREE.MeshStandardMaterial({ color: 0x46557a, roughness: 0.95, ...DECAL(1) }),
   );
   lane.rotation.x = -Math.PI / 2;
   lane.position.set(LANE.x, 0.0005, laneZ);
   lane.receiveShadow = true;
   scene.add(lane);
   const kerbMat = [
-    new THREE.MeshStandardMaterial({ color: 0xf2f2f2 }),
-    new THREE.MeshStandardMaterial({ color: PALETTE.accent }),
+    new THREE.MeshStandardMaterial({ color: 0xf2f2f2, ...DECAL(2) }),
+    new THREE.MeshStandardMaterial({ color: PALETTE.accent, ...DECAL(2) }),
   ];
   const kerbGeo = new THREE.PlaneGeometry(0.35, 1.5);
   for (const side of [-1, 1]) {

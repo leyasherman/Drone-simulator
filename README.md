@@ -5,6 +5,8 @@ and a Flight School with instructor briefings, demo flights and hands-on practic
 
 Built with TypeScript, Three.js and Vite. Work in progress.
 
+**Play it:** https://drone-simulator-tan.vercel.app (desktop Chrome, Edge or Firefox; keyboard or gamepad).
+
 ## Run it
 
 Needs Node 20 or newer.

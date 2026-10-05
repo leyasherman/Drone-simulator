@@ -21,6 +21,16 @@ the research in `sendline-main/docs/` or from PLAN.md.
 
 <!-- Entries below -->
 
+## D-021. Early deploy to Vercel
+- Date: 2026-10-05
+- Status: accepted
+- Decision: deploy now instead of waiting for stage 13, so the client can open the game from a link.
+  Vercel project imported from GitHub (leyasherman/Drone-simulator), Vite preset, npm run build, dist/.
+  Every push to main redeploys. Live at https://drone-simulator-tan.vercel.app.
+- Note: Vercel Hobby is for non-commercial use. Fine for the demo; revisit the plan if this becomes a product.
+- Fix found on the live site: the lane and kerbs flickered against the ground in the distance (z-fighting).
+  Ground markings now use polygon offset.
+
 ## D-020. Menus, intro, pause, settings
 - Date: 2026-10-05
 - Stage: 7b (moved before 11)
