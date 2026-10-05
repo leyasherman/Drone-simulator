@@ -5,7 +5,9 @@ import { FreeFlight } from './game/free-flight';
 import { LessonSession } from './game/lesson-session';
 import { Progress, browserStore } from './game/progress';
 import { ProgressSync, supabaseBackend } from './net/progress-sync';
+import { Account } from './net/account';
 import { ensureSession, supabase } from './net/supabase';
+import { AccountPanel } from './ui/account-panel';
 import { loadSettings, saveSettings, type Settings } from './game/settings';
 import { ARM_THROTTLE_LIMIT } from './input/arming';
 import { InputManager } from './input/input';
@@ -59,7 +61,13 @@ const flight = new FreeFlight(FREESTYLE_5, input, collidersFrom(layout));
 const progress = new Progress(store);
 // Progress lives in Supabase once signed in (silently, anonymously on the first visit); local copy otherwise
 const sync = supabase ? new ProgressSync(progress, supabaseBackend(supabase)) : null;
-void ensureSession().then((uid) => (uid && sync ? sync.start() : undefined));
+const account = supabase ? new Account(supabase) : null;
+void ensureSession().then(async (uid) => {
+  if (!uid) return;
+  await sync?.start();
+  await account?.refresh();
+  refreshPlayerChip();
+});
 const hud = new Hud(document.body);
 const radio = new RadioOverlay(document.body);
 const prompts = new Prompts(document.body);
@@ -95,7 +103,7 @@ function updateSettings(s: Settings): void {
 // ---- Screens ----
 // While any screen is open the sim is paused; input is still polled so keys pressed there are used up.
 
-type Screen = 'none' | 'menu' | 'intro' | 'pause' | 'settings' | 'list';
+type Screen = 'none' | 'menu' | 'intro' | 'pause' | 'settings' | 'list' | 'account';
 let screen: Screen = 'none';
 /** Where Settings and the lesson list go back to. */
 let settingsReturn: Screen = 'menu';
@@ -127,12 +135,40 @@ const INTRO: IntroLine[] = [
   },
 ];
 
-const mainMenu = new MainMenu(document.body, (id) => {
-  if (id === 'school') openLessonList('menu');
-  if (id === 'free') startFreeFlight();
-  if (id === 'intro') playIntro();
-  if (id === 'settings') openSettings('menu');
-});
+const mainMenu = new MainMenu(
+  document.body,
+  (id) => {
+    if (id === 'school') openLessonList('menu');
+    if (id === 'free') startFreeFlight();
+    if (id === 'intro') playIntro();
+    if (id === 'settings') openSettings('menu');
+    if (id === 'account' && accountPanel) {
+      show('account');
+      void accountPanel.open();
+    }
+  },
+  account !== null,
+);
+
+/** Updates the player chip on the main menu from the account state. */
+function refreshPlayerChip(): void {
+  if (!account) return;
+  const s = account.state;
+  mainMenu.setPlayer(s.nickname, progress.totalXp, s.anonymous);
+}
+
+const accountPanel = account
+  ? new AccountPanel(document.body, account, {
+      done: () => showMainMenu(),
+      // A different account (or a new guest after sign-out): load its progress
+      sessionChanged: async () => {
+        progress.replace({ completed: {}, totalXp: 0 });
+        await ensureSession();
+        await sync?.start();
+      },
+      updated: () => refreshPlayerChip(),
+    })
+  : null;
 const pauseMenu = new PauseMenu(document.body, (id) => {
   if (id === 'resume') resume();
   if (id === 'respawn') {
@@ -153,6 +189,8 @@ function show(s: Screen): void {
   mainMenu.visible = s === 'menu';
   pauseMenu.visible = s === 'pause';
   settingsPanel.visible = s === 'settings';
+  if (accountPanel) accountPanel.visible = s === 'account';
+  if (s === 'menu') refreshPlayerChip();
   if (s !== 'intro') intro.visible = false;
   if (s !== 'list') lessonList.close();
   // Flight UI only while flying
@@ -330,6 +368,7 @@ window.addEventListener('keydown', (e) => {
     if (screen === 'none') pause();
     else if (screen === 'pause') resume();
     else if (screen === 'settings') show(settingsReturn);
+    else if (screen === 'account') showMainMenu();
     // The lesson list and the intro handle Esc themselves
   }
   if (screen !== 'none') return;

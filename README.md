@@ -43,12 +43,13 @@ npm run build      # production build in dist/
 - **Flight School:** 7 lessons in the first course. Each has instructor lines, a demo flight with live sticks
   on a radio overlay, and a practice with gates and landing pads, XP and a completion screen.
   Progress is saved in the browser.
+- **Accounts (Supabase):** a guest account is made silently on the first visit; create an account with email and
+  password to keep progress on any device. XP is awarded by the server, not the browser.
 - **Flight recording and playback** (P in free flight), used for lesson demos.
 
 ## Coming next
 
-Lesson editor, a larger free-flight map, menus and settings, accounts and progress in Supabase,
-motor sound, deployment on Vercel.
+Lesson editor, a larger free-flight map, motor sound, polish.
 
 ## Project docs
 

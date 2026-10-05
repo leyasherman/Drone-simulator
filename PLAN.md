@@ -126,7 +126,7 @@ and cap them. A silent anonymous account on the first visit. Progress loads from
 survives a reload; a direct update of XP from the client is refused; Supabase advisors report no security issues;
 the live site saves progress too.
 
-### Stage 12b. Account screen: email and password `[ ]`
+### Stage 12b. Account screen: email and password `[x]`
 Create an account (turns the anonymous one into a permanent one, progress kept), sign in, sign out, nickname.
 **Done when:** progress made anonymously survives signing up; signing in from another browser shows the same
 progress; a bad password or a taken email shows a clear message.

@@ -21,6 +21,23 @@ the research in `sendline-main/docs/` or from PLAN.md.
 
 <!-- Entries below -->
 
+## D-023. Account screen (email and password)
+- Date: 2026-10-05
+- Stage: 12b
+- Status: accepted
+- Create account = updateUser({ email, password }) on the current anonymous user: same user id, so progress stays.
+  Checked on the live project: works in one call while "Confirm email" is off.
+- Sign in from another device replaces the guest session there; lessons the guest finished on that device are
+  uploaded to the account (ProgressSync.start), so nothing flown is lost. Sign out clears local progress and starts
+  a new guest.
+- Nickname: set_nickname() RPC (security definer), 3-20 letters, digits, _ or -, not unique (display name only).
+- Errors in plain words from Supabase codes (invalid_credentials, email_exists, weak_password, ...).
+- Two bugs found by the browser run: game keys (W, A, S, D, R, C, Space) were swallowed while typing in form
+  fields, and every re-render wiped what the player had typed. Game keys now ignore form fields; the form keeps
+  the email (and a rejected nickname) and clears the password after a failed attempt.
+- Later, before a public launch: a real mailer and email confirmation, password reset, CAPTCHA on anonymous
+  sign-ins, leaked-password protection (Supabase paid plans).
+
 ## D-022. Accounts and progress in Supabase
 - Date: 2026-10-05
 - Stage: 12a

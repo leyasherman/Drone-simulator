@@ -41,28 +41,43 @@ class Overlay {
 }
 
 /** Start screen: title, a line about the game, the main choices, and the mascot. */
+export type MainMenuItem = 'school' | 'free' | 'intro' | 'settings' | 'account';
+
 export class MainMenu extends Overlay {
-  constructor(parent: HTMLElement, onPick: (id: 'school' | 'free' | 'intro' | 'settings') => void) {
+  private readonly player: HTMLButtonElement;
+
+  /** `withAccount`: show the player chip and the Account item (only when a backend is configured). */
+  constructor(parent: HTMLElement, onPick: (id: MainMenuItem) => void, withAccount = false) {
     super(parent, 'mn-main');
     this.root.innerHTML = `
       <div class="mn-card">
         <div class="mn-col">
+          <button class="mn-player" data-item="account" hidden><i>✈</i><b data-nick></b><span data-xp></span></button>
           <div class="mn-kicker">Browser FPV simulator</div>
           <h1>Drone<br />Sim</h1>
           <p class="mn-tag">Learn to fly FPV one stick at a time, then go wherever you like.</p>
           <div class="mn-list">${menuButtons([
             { id: 'school', label: 'Flight School', hint: 'Start here' },
             { id: 'free', label: 'Free flight' },
+            ...(withAccount ? [{ id: 'account', label: 'Account' }] : []),
             { id: 'intro', label: 'Controls' },
             { id: 'settings', label: 'Settings' },
           ])}</div>
         </div>
         <div class="mn-art">${mascotSvg('wave')}</div>
       </div>`;
+    this.player = this.root.querySelector('.mn-player')!;
     this.root.addEventListener('click', (e) => {
       const id = (e.target as HTMLElement).closest<HTMLElement>('[data-item]')?.dataset.item;
-      if (id) onPick(id as 'school' | 'free' | 'intro' | 'settings');
+      if (id) onPick(id as MainMenuItem);
     });
+  }
+
+  /** Shows who is flying: nickname, XP, guest or member. */
+  setPlayer(nickname: string, xp: number, guest: boolean): void {
+    this.player.hidden = !nickname;
+    this.player.querySelector('[data-nick]')!.textContent = nickname;
+    this.player.querySelector('[data-xp]')!.textContent = `${xp} XP${guest ? ' · guest' : ''}`;
   }
 }
 

@@ -52,6 +52,15 @@ const KEYS = {
 
 const GAME_KEYS = new Set<string>(Object.values(KEYS));
 
+/** True for text inputs, text areas and editable elements. */
+export function isTypingTarget(t: EventTarget | null): boolean {
+  if (!t || typeof (t as HTMLElement).tagName !== 'string') return false;
+  const el = t as HTMLElement;
+  return (
+    el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable
+  );
+}
+
 /** Moves `current` toward `target` at `rateOut` (away from centre) or `rateBack` (toward centre). */
 function ramp(current: number, target: number, rateOut: number, rateBack: number, dt: number): number {
   const towardCentre = Math.abs(target) < Math.abs(current) || Math.sign(target) !== Math.sign(current);
@@ -101,6 +110,8 @@ export class KeyboardInput implements InputSource {
   /** Wires the browser keyboard. Returns a function that unwires it. */
   attach(target: Window): () => void {
     const onDown = (e: KeyboardEvent) => {
+      // Typing in a form field (email, nickname) is not flying
+      if (isTypingTarget(e.target)) return;
       if (GAME_KEYS.has(e.code)) e.preventDefault();
       if (!e.repeat) this.keyDown(e.code);
     };
