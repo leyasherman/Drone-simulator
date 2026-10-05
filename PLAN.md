@@ -102,7 +102,7 @@ local progress (localStorage), completion screen with Next lesson / Try again / 
 **Done when:** the list shows lesson 1 and its status; finishing it marks it done and survives a reload;
 Next lesson / All lessons / Exit go where they say.
 
-### Stage 10b. Course 1: seven lessons `[ ]`
+### Stage 10b. Course 1: seven lessons `[x]`
 A lesson lane on the field, an autopilot that flies any lesson's objectives, demo clips made by it,
 six more lessons with our own texts.
 **Done when:** a test flies every lesson's practice with the autopilot and completes it; all 7 lessons play in the browser.

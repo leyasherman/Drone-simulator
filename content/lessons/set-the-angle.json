@@ -1,0 +1,52 @@
+{
+  "id": "set-the-angle",
+  "title": "Find Your Angle",
+  "summary": "More tilt means more speed. Lean in, then pull back to stop on the far pad.",
+  "icon": "angle",
+  "spawn": {
+    "position": [2.5, 0, 2.5],
+    "yaw": 0
+  },
+  "steps": [
+    {
+      "id": "tilt-is-speed",
+      "lines": [
+        {
+          "text": "The further you tilt, the faster you go. A small lean is a slow cruise.",
+          "pose": "think"
+        },
+        {
+          "text": "To slow down, tip the nose back up past level for a moment. Then let it settle.",
+          "pose": "point"
+        }
+      ],
+      "demo": {
+        "clip": "set-the-angle",
+        "camera": "chase"
+      }
+    }
+  ],
+  "practice": {
+    "instruction": "Fly through both gates, then slow down and land on the pad at the end of the lane.",
+    "objectives": [
+      {
+        "kind": "gate",
+        "id": "gate-1",
+        "position": [2.5, 2.5, -14],
+        "size": [3, 2.4]
+      },
+      {
+        "kind": "gate",
+        "id": "gate-2",
+        "position": [2.5, 2.5, -32],
+        "size": [3, 2.4]
+      },
+      {
+        "kind": "land",
+        "id": "pad",
+        "position": [2.5, 0, -46],
+        "radius": 1.5
+      }
+    ]
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "id": "hold-the-line",
+  "title": "Hold the Line",
+  "summary": "Small taps of roll keep you on the centre line through narrow gates.",
+  "icon": "line",
+  "spawn": {
+    "position": [2.5, 0, 2.5],
+    "yaw": 0
+  },
+  "steps": [
+    {
+      "id": "drift",
+      "lines": [
+        {
+          "text": "Quads drift. Any small lean to the side and you slide off your line.",
+          "pose": "think"
+        },
+        {
+          "text": "Tap the right stick left or right to steer back. Tiny inputs, then let go.",
+          "pose": "point"
+        }
+      ],
+      "demo": {
+        "clip": "hold-the-line",
+        "camera": "fpv"
+      }
+    }
+  ],
+  "practice": {
+    "instruction": "Stay on the centre line through all four narrow gates.",
+    "objectives": [
+      {
+        "kind": "gate",
+        "id": "gate-1",
+        "position": [2.5, 2, -10],
+        "size": [1.8, 1.8]
+      },
+      {
+        "kind": "gate",
+        "id": "gate-2",
+        "position": [2.5, 2, -20],
+        "size": [1.8, 1.8]
+      },
+      {
+        "kind": "gate",
+        "id": "gate-3",
+        "position": [2.5, 2, -30],
+        "size": [1.8, 1.8]
+      },
+      {
+        "kind": "gate",
+        "id": "gate-4",
+        "position": [2.5, 2, -40],
+        "size": [1.8, 1.8]
+      }
+    ]
+  }
+}

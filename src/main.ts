@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Autopilot } from './game/autopilot';
 import { allCourses, getLesson, nextLessonId } from './game/content';
 import { Progress } from './game/progress';
 import { FreeFlight } from './game/free-flight';
@@ -172,6 +173,7 @@ if (import.meta.env.DEV) {
       lesson: () => lesson,
       startLesson,
       openLessonList,
+      Autopilot,
       progress,
     },
   });

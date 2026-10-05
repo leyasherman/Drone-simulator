@@ -1,0 +1,64 @@
+{
+  "id": "first-flight-run",
+  "title": "First Run",
+  "summary": "Everything so far in one run: take off, four gates, land at the end.",
+  "icon": "run",
+  "spawn": {
+    "position": [2.5, 0, 2.5],
+    "yaw": 0
+  },
+  "steps": [
+    {
+      "id": "all-together",
+      "lines": [
+        {
+          "text": "Time to put it all together. Throttle, tilt, line and height.",
+          "pose": "wave"
+        },
+        {
+          "text": "No rush. A clean run beats a fast one.",
+          "pose": "arms-crossed"
+        }
+      ],
+      "demo": {
+        "clip": "first-flight-run",
+        "camera": "chase"
+      }
+    }
+  ],
+  "practice": {
+    "instruction": "Fly the whole lane: four gates, then land on the last pad.",
+    "objectives": [
+      {
+        "kind": "gate",
+        "id": "gate-1",
+        "position": [2.5, 2, -10],
+        "size": [3, 2.4]
+      },
+      {
+        "kind": "gate",
+        "id": "gate-2",
+        "position": [2.5, 4.5, -22],
+        "size": [3, 2]
+      },
+      {
+        "kind": "gate",
+        "id": "gate-3",
+        "position": [2.5, 2.5, -34],
+        "size": [2.2, 2]
+      },
+      {
+        "kind": "gate",
+        "id": "gate-4",
+        "position": [2.5, 3, -48],
+        "size": [2.2, 1.6]
+      },
+      {
+        "kind": "land",
+        "id": "pad",
+        "position": [2.5, 0, -58],
+        "radius": 1.5
+      }
+    ]
+  }
+}

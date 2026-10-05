@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { BoxLook, BoxSpec } from './test-field-layout';
+import { LANE, type BoxLook, type BoxSpec } from './test-field-layout';
 
 /** Palette for the daylight look: cool blue-grey ground, pale sky, orange accents. */
 const PALETTE = {
@@ -141,6 +141,31 @@ export function createTestField(layout: readonly BoxSpec[]): TestField {
   );
   padEdge.position.set(2.5, 0, 2.5); // orange rim, 1 mm above ground
   scene.add(pad, padEdge);
+
+  // Lesson lane: a dark strip with striped kerbs, from behind the pad forward along -z
+  const laneLen = LANE.zStart - LANE.zEnd;
+  const laneZ = (LANE.zStart + LANE.zEnd) / 2;
+  const lane = new THREE.Mesh(
+    new THREE.PlaneGeometry(LANE.halfWidth * 2, laneLen),
+    new THREE.MeshStandardMaterial({ color: 0x46557a, roughness: 0.95 }),
+  );
+  lane.rotation.x = -Math.PI / 2;
+  lane.position.set(LANE.x, 0.0005, laneZ);
+  lane.receiveShadow = true;
+  scene.add(lane);
+  const kerbMat = [
+    new THREE.MeshStandardMaterial({ color: 0xf2f2f2 }),
+    new THREE.MeshStandardMaterial({ color: PALETTE.accent }),
+  ];
+  const kerbGeo = new THREE.PlaneGeometry(0.35, 1.5);
+  for (const side of [-1, 1]) {
+    for (let i = 0; i < laneLen / 1.5; i++) {
+      const k = new THREE.Mesh(kerbGeo, kerbMat[i % 2]!);
+      k.rotation.x = -Math.PI / 2;
+      k.position.set(LANE.x + side * (LANE.halfWidth - 0.175), 0.001, LANE.zStart - 0.75 - i * 1.5);
+      scene.add(k);
+    }
+  }
 
   // World boxes (shared with physics)
   const looks: Record<BoxLook, THREE.Material> = {

@@ -1,0 +1,63 @@
+{
+  "id": "going-forward",
+  "title": "Nose Forward",
+  "summary": "Tip the nose down with the right stick and fly through two gates. Slow and steady.",
+  "icon": "forward",
+  "spawn": {
+    "position": [2.5, 0, 2.5],
+    "yaw": 0
+  },
+  "steps": [
+    {
+      "id": "right-stick",
+      "lines": [
+        {
+          "text": "Now the right stick. Push it forward and the nose tips down.",
+          "pose": "point"
+        },
+        {
+          "text": "Tilted, the props push you forward as well as up. That is how a quad travels.",
+          "pose": "think"
+        }
+      ],
+      "demo": {
+        "clip": "going-forward",
+        "camera": "chase"
+      }
+    },
+    {
+      "id": "mind-height",
+      "lines": [
+        {
+          "text": "Watch the height on the way. Leaning forward takes a bit of lift away.",
+          "pose": "point"
+        },
+        {
+          "text": "A touch more throttle while you move keeps you level. Let go of the right stick to level out.",
+          "pose": "arms-crossed"
+        }
+      ],
+      "demo": {
+        "clip": "going-forward",
+        "camera": "fpv"
+      }
+    }
+  ],
+  "practice": {
+    "instruction": "Take off, push the right stick gently forward, and fly through both gates.",
+    "objectives": [
+      {
+        "kind": "gate",
+        "id": "gate-1",
+        "position": [2.5, 2, -10],
+        "size": [3, 2.4]
+      },
+      {
+        "kind": "gate",
+        "id": "gate-2",
+        "position": [2.5, 2, -22],
+        "size": [3, 2.4]
+      }
+    ]
+  }
+}

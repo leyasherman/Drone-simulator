@@ -4,11 +4,7 @@
   "summary": "Use the throttle to leave the pad, climb through the ring, and set it back down.",
   "icon": "takeoff",
   "spawn": {
-    "position": [
-      2.5,
-      0,
-      2.5
-    ],
+    "position": [2.5, 0, 2.5],
     "yaw": 0
   },
   "steps": [
@@ -57,29 +53,14 @@
       {
         "kind": "gate",
         "id": "ring",
-        "position": [
-          2.5,
-          4,
-          2.5
-        ],
-        "rotation": [
-          90,
-          0,
-          0
-        ],
-        "size": [
-          3,
-          3
-        ]
+        "position": [2.5, 4, 2.5],
+        "rotation": [90, 0, 0],
+        "size": [3, 3]
       },
       {
         "kind": "land",
         "id": "pad",
-        "position": [
-          2.5,
-          0,
-          2.5
-        ],
+        "position": [2.5, 0, 2.5],
         "radius": 1.2
       }
     ]

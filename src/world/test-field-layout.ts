@@ -35,18 +35,28 @@ const box = (
   look,
 });
 
+/** The lesson lane: a clear strip from the pad along -z. Lessons place their gates and pads in it. */
+export const LANE = { x: 2.5, zStart: 8, zEnd: -80, halfWidth: 8 } as const;
+
+function inLane(x: number, z: number, radius: number): boolean {
+  return (
+    Math.abs(x - LANE.x) < LANE.halfWidth + 4 + radius &&
+    z < LANE.zStart + radius &&
+    z > LANE.zEnd - 10 - radius
+  );
+}
+
 /** Test field near the spawn (2.5, 0, 2.5); the drone faces -z. Seeded, so it is the same every time. */
 export function testFieldLayout(): BoxSpec[] {
   const out: BoxSpec[] = [];
 
-  // A simple gate 12 m ahead: 3 m wide, 2.4 m tall opening, posts and top bar 15 cm thick
+  // Free-flight toys to the left of the lesson lane: a gate (3 × 2.4 m opening) and a thin wall (10 cm)
+  const gx = -16;
   const gz = -10;
-  out.push(box(2.5 - 1.575, 1.275, gz, 0.15, 2.55, 0.15, 'frame'));
-  out.push(box(2.5 + 1.575, 1.275, gz, 0.15, 2.55, 0.15, 'frame'));
-  out.push(box(2.5, 2.475, gz, 3.3, 0.15, 0.15, 'accent'));
-
-  // A thin wall (10 cm) to the right, for crash testing
-  out.push(box(12, 1.5, -6, 0.1, 3, 8, 'pale'));
+  out.push(box(gx - 1.575, 1.275, gz, 0.15, 2.55, 0.15, 'frame'));
+  out.push(box(gx + 1.575, 1.275, gz, 0.15, 2.55, 0.15, 'frame'));
+  out.push(box(gx, 2.475, gz, 3.3, 0.15, 0.15, 'accent'));
+  out.push(box(-26, 1.5, -6, 0.1, 3, 8, 'pale'));
 
   // Reference blocks at mid distance and a ring of pale buildings on the horizon
   const rand = seeded(7);
@@ -56,7 +66,11 @@ export function testFieldLayout(): BoxSpec[] {
     const w = 4 + rand() * 6;
     const h = 1.5 + rand() * 4;
     const d = 3 + rand() * 6;
-    out.push(box(Math.cos(a) * r, h / 2, Math.sin(a) * r, w, h, d, 'dark', rand() * Math.PI));
+    const yaw = rand() * Math.PI;
+    const x = Math.cos(a) * r;
+    const z = Math.sin(a) * r;
+    if (inLane(x, z, Math.hypot(w, d) / 2)) continue; // keep the lesson lane clear
+    out.push(box(x, h / 2, z, w, h, d, 'dark', yaw));
   }
   for (let i = 0; i < 40; i++) {
     const a = (i / 40) * Math.PI * 2 + rand() * 0.1;

@@ -1,4 +1,20 @@
 [
-  { "id": "first-flight", "title": "First Flight", "lessons": ["first-takeoff"] },
-  { "id": "banking", "title": "Banking", "lessons": [] }
+  {
+    "id": "first-flight",
+    "title": "First Flight",
+    "lessons": [
+      "first-takeoff",
+      "going-forward",
+      "set-the-angle",
+      "hold-the-line",
+      "keep-your-height",
+      "change-your-height",
+      "first-flight-run"
+    ]
+  },
+  {
+    "id": "banking",
+    "title": "Banking",
+    "lessons": []
+  }
 ]

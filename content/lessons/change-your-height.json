@@ -1,0 +1,58 @@
+{
+  "id": "change-your-height",
+  "title": "Up and Over",
+  "summary": "Climb for the high gate, drop for the low one, then land.",
+  "icon": "climb",
+  "spawn": {
+    "position": [2.5, 0, 2.5],
+    "yaw": 0
+  },
+  "steps": [
+    {
+      "id": "climb-drop",
+      "lines": [
+        {
+          "text": "Changing height while moving: add throttle to climb, ease off to drop.",
+          "pose": "point"
+        },
+        {
+          "text": "Start early. The quad needs a moment to answer.",
+          "pose": "think"
+        }
+      ],
+      "demo": {
+        "clip": "change-your-height",
+        "camera": "chase"
+      }
+    }
+  ],
+  "practice": {
+    "instruction": "Low gate, high gate, low gate, then land on the pad.",
+    "objectives": [
+      {
+        "kind": "gate",
+        "id": "gate-1",
+        "position": [2.5, 2, -10],
+        "size": [3, 2]
+      },
+      {
+        "kind": "gate",
+        "id": "gate-2",
+        "position": [2.5, 5.5, -22],
+        "size": [3, 2]
+      },
+      {
+        "kind": "gate",
+        "id": "gate-3",
+        "position": [2.5, 2, -34],
+        "size": [3, 2]
+      },
+      {
+        "kind": "land",
+        "id": "pad",
+        "position": [2.5, 0, -44],
+        "radius": 1.5
+      }
+    ]
+  }
+}

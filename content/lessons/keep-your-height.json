@@ -1,0 +1,52 @@
+{
+  "id": "keep-your-height",
+  "title": "Steady Height",
+  "summary": "Short gates at the same height. Keep the throttle smooth while you fly forward.",
+  "icon": "height",
+  "spawn": {
+    "position": [2.5, 0, 2.5],
+    "yaw": 0
+  },
+  "steps": [
+    {
+      "id": "level",
+      "lines": [
+        {
+          "text": "These gates are short, so your height has to stay put.",
+          "pose": "arms-crossed"
+        },
+        {
+          "text": "Find the throttle that holds you level while moving, then make only small changes.",
+          "pose": "point"
+        }
+      ],
+      "demo": {
+        "clip": "keep-your-height",
+        "camera": "fpv"
+      }
+    }
+  ],
+  "practice": {
+    "instruction": "Fly through three short gates without climbing or sinking.",
+    "objectives": [
+      {
+        "kind": "gate",
+        "id": "gate-1",
+        "position": [2.5, 3.5, -12],
+        "size": [3, 1.3]
+      },
+      {
+        "kind": "gate",
+        "id": "gate-2",
+        "position": [2.5, 3.5, -26],
+        "size": [3, 1.3]
+      },
+      {
+        "kind": "gate",
+        "id": "gate-3",
+        "position": [2.5, 3.5, -40],
+        "size": [3, 1.3]
+      }
+    ]
+  }
+}

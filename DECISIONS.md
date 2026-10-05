@@ -21,6 +21,23 @@ the research in `sendline-main/docs/` or from PLAN.md.
 
 <!-- Entries below -->
 
+## D-019. Course 1 lessons, autopilot, lesson lane
+- Date: 2026-10-05
+- Stage: 10b
+- Status: accepted
+- Lessons 2-7 are our own designs based only on the original's lesson titles and card icons (we never saw their
+  contents): Nose Forward (2 gates), Find Your Angle (2 gates + stop on a pad), Hold the Line (4 narrow gates),
+  Steady Height (3 short gates at 3.5 m), Up and Over (low/high/low + pad), First Run (4 mixed gates + pad).
+  Revisit if the user sends screenshots of the original lessons.
+- Lesson lane: a clear 16 m strip from the pad along -z, drawn as a dark track with kerbs. Dark blocks inside it
+  are skipped; the free-flight gate and wall moved to the left of it.
+- Autopilot (game/autopilot.ts) flies objectives with sticks only (rate mode): line up 4 m in front of a gate and
+  exit 3 m behind; hover above a pad, then land. It holds heading, tilts toward a target velocity, holds height.
+- Tests fly every lesson's practice with the autopilot, with the field's obstacles: each must complete in under
+  60 s with no crash. The same autopilot generates the demo clips for lessons 2-7 (npm run clips).
+- Cost: all clips are bundled eagerly (~800 KB of JSON, smaller gzipped). Move to lazy loading or binary clips
+  before release (stage 13).
+
 ## D-018. Lesson list and local progress
 - Date: 2026-10-05
 - Stage: 10a
