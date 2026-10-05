@@ -43,6 +43,19 @@ export function inducedVelocity(thrust: number, propRadius: number): number {
 }
 
 /** Thrust factor when air already flows through the prop (climbing or diving along the thrust axis). */
+/** Ground effect reaches this many prop radii above a surface. */
+export const GROUND_EFFECT_RADII = 9.45;
+/** Up to this much extra thrust right at the surface. */
+const GROUND_EFFECT_STRENGTH = 0.2;
+
+/** Thrust factor near a surface; `agl` is the height of the props above it, m. */
+export function groundEffect(agl: number, propRadius: number): number {
+  const reach = GROUND_EFFECT_RADII * propRadius;
+  if (!(agl < reach)) return 1;
+  const k = 1 - Math.max(0, agl) / reach;
+  return 1 + GROUND_EFFECT_STRENGTH * k * k;
+}
+
 export function inflowFactor(axial: number, induced: number): number {
   const f = 1 - (INFLOW_LOSS * axial) / Math.max(1, induced);
   return Math.min(INFLOW_MAX, Math.max(INFLOW_MIN, f));
@@ -68,8 +81,8 @@ export class Quad {
     return (p.mass * GRAVITY * p.thrustToWeight) / 4;
   }
 
-  /** Run before body.step(dt). */
-  step(body: RigidBody, input: MotorInput, dt: number): void {
+  /** Run before body.step(dt). `agl`: distance from the body centre down to a surface (Infinity if far). */
+  step(body: RigidBody, input: MotorInput, dt: number, agl = Infinity): void {
     const p = this.profile;
 
     // 1. Throttle stick → curve → idle floor → mixer targets
@@ -94,7 +107,10 @@ export class Quad {
     tmpInv.copy(body.orientation).invert();
     const air = tmpAir.copy(body.velocity).applyQuaternion(tmpInv);
     const w = body.angularVelocity;
-    const maxT = this.maxMotorThrust;
+    // Ground effect only works with the props facing the ground
+    const upright = 1 - 2 * (body.orientation.x ** 2 + body.orientation.z ** 2); // body up · world up
+    const ge = upright > 0.7 ? groundEffect(agl - p.size.y / 2, p.propRadius) : 1;
+    const maxT = this.maxMotorThrust * ge;
     let total = 0;
     let tx = 0;
     let ty = 0;

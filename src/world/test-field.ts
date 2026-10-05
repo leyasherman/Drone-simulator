@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import type { BoxLook, BoxSpec } from './test-field-layout';
 
 /** Palette for the daylight look: cool blue-grey ground, pale sky, orange accents. */
 const PALETTE = {
@@ -95,7 +96,8 @@ function seeded(seed: number): () => number {
   };
 }
 
-export function createTestField(): TestField {
+/** Builds the scene for a layout from test-field-layout.ts. */
+export function createTestField(layout: readonly BoxSpec[]): TestField {
   const scene = new THREE.Scene();
   scene.fog = new THREE.Fog(PALETTE.fog, 60, 480);
   scene.add(sky());
@@ -140,32 +142,23 @@ export function createTestField(): TestField {
   padEdge.position.set(2.5, 0, 2.5); // orange rim, 1 mm above ground
   scene.add(pad, padEdge);
 
-  // Reference blocks at mid distance and a ring of pale buildings on the horizon
-  const rand = seeded(7);
-  const boxMat = new THREE.MeshStandardMaterial({ color: PALETTE.buildingDark, roughness: 0.8 });
-  const paleMat = new THREE.MeshStandardMaterial({ color: PALETTE.building, roughness: 0.9 });
-  for (let i = 0; i < 14; i++) {
-    const a = (i / 14) * Math.PI * 2 + rand() * 0.2;
-    const r = 35 + rand() * 30;
-    const w = 4 + rand() * 6;
-    const h = 1.5 + rand() * 4;
-    const box = new THREE.Mesh(new THREE.BoxGeometry(w, h, 3 + rand() * 6), boxMat);
-    box.position.set(Math.cos(a) * r, h / 2, Math.sin(a) * r);
-    box.rotation.y = rand() * Math.PI;
-    box.castShadow = box.receiveShadow = true;
-    scene.add(box);
-  }
-  for (let i = 0; i < 40; i++) {
-    const a = (i / 40) * Math.PI * 2 + rand() * 0.1;
-    const r = 260 + rand() * 120;
-    const w = 15 + rand() * 30;
-    const h = 12 + rand() * 35;
-    const tower = new THREE.Mesh(new THREE.BoxGeometry(w, h, 15 + rand() * 25), paleMat);
-    tower.position.set(Math.cos(a) * r, h / 2, Math.sin(a) * r);
-    tower.rotation.y = rand() * Math.PI;
-    scene.add(tower);
+  // World boxes (shared with physics)
+  const looks: Record<BoxLook, THREE.Material> = {
+    dark: new THREE.MeshStandardMaterial({ color: PALETTE.buildingDark, roughness: 0.8 }),
+    pale: new THREE.MeshStandardMaterial({ color: PALETTE.building, roughness: 0.9 }),
+    accent: new THREE.MeshStandardMaterial({ color: PALETTE.accent, roughness: 0.6 }),
+    frame: new THREE.MeshStandardMaterial({ color: 0xe9eef5, roughness: 0.6 }),
+  };
+  for (const b of layout) {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(b.size.x, b.size.y, b.size.z), looks[b.look]);
+    mesh.position.copy(b.center);
+    mesh.rotation.y = b.yaw;
+    // Far buildings are too big for the shadow box; skip them
+    mesh.castShadow = mesh.receiveShadow = b.center.length() < 150;
+    scene.add(mesh);
   }
 
+  const rand = seeded(11);
   for (let i = 0; i < 12; i++) {
     const c = cloud(rand);
     const a = rand() * Math.PI * 2;

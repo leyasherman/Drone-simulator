@@ -21,6 +21,24 @@ the research in `sendline-main/docs/` or from PLAN.md.
 
 <!-- Entries below -->
 
+## D-013. Collisions, ground states, crashes
+- Date: 2026-10-05
+- Stage: 5
+- Status: accepted
+- Contacts: the 8 corners of the drone's box against the ground plane and oriented boxes. Push out along the
+  normals, then 4 rounds of impulses (bounce 0.1 only above 1 m/s, friction 0.7). No bounce on slow contacts,
+  so a resting quad does not jitter.
+- Tunnelling: only when a step is longer than 5 cm (over 12 m/s), sweep the centre against obstacles grown by
+  the body's bounding radius; on a hit, stop at the face and bounce there. First try used the smallest half-size
+  and stopped the centre only: corners went through a 10 cm wall and the quad got stuck. A sweep on every step
+  also froze a quad resting on a box top, so it runs only on fast steps.
+- Ground states (research rules): at rest for 0.12 s → upright (only yaw allowed), tipped (thrust cut, a small
+  torque drops it flat), turtled (controller off, spin stopped). Respawn prompt after 3 s turtled, auto respawn at 20 s.
+- Crash = impact over 7 m/s (11 m/s belly-first), from contact approach speed. Light hit 0.5 m/s, hard hit 3 m/s
+  (for sound and camera shake later). The research uses contact force from Rapier; we use speed (D-003).
+- Ground effect: up to +20% thrust within 9.45 prop radii of a surface, only when upright; distance from a ray down.
+- The field layout is data (test-field-layout.ts) shared by renderer and physics; it now has a gate and a thin wall.
+
 ## D-012. First 3D flight setup
 - Date: 2026-10-05
 - Stage: 4

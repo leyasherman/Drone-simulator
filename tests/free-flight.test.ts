@@ -25,7 +25,7 @@ describe('FreeFlight', () => {
     fly(flight, 1);
     expect(flight.drone.armed).toBe(false);
     expect(flight.altitude).toBeLessThan(0.01);
-    expect(flight.contact.touching).toBe(true);
+    expect(flight.drone.contact.touching).toBe(true);
   });
 
   it('refuses to arm with throttle up', () => {
@@ -48,7 +48,7 @@ describe('FreeFlight', () => {
 
     input.keyboard.setThrottle(0.3); // below hover: sink
     fly(flight, 6);
-    expect(flight.contact.touching).toBe(true);
+    expect(flight.drone.contact.touching).toBe(true);
     expect(flight.drone.body.velocity.length()).toBeLessThan(0.1);
     const up = flight.drone.body.orientation;
     expect(Math.abs(up.x) + Math.abs(up.z)).toBeLessThan(0.01); // still level

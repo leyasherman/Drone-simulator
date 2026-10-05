@@ -15,6 +15,9 @@ Stack: TypeScript, Three.js, Vite, Vercel, Supabase. Free tiers only.
 Status: `[ ]` not started, `[~]` in progress, `[x]` done (criteria checked, committed).
 Rule: one stage at a time. After each stage, report and wait for approval.
 
+**Build order (agreed 2026-10-05):** 0, 1, 2a, 2b, 3, 4, 5, 7a, 8, 9, 10, 11, 6, 7b, 12, 13.
+Lessons come before the city map: they are what the client values most and they only need the training area.
+
 ---
 
 ## Foundations
@@ -52,7 +55,7 @@ tests for axis normalisation and deadband pass.
 Our own low-poly drone model, FPV camera (FOV 100°, uptilt 30°), chase camera, test field (grid, sky, clouds, light).
 **Done when:** you can take off, fly and land with keyboard and gamepad; steady 60 fps; camera switching works.
 
-### Stage 5. Collisions and respawn `[ ]`
+### Stage 5. Collisions and respawn `[x]`
 World made of boxes (OBB), collisions with continuous detection, a downward raycast, ground states
 (upright / tipped / upside down), light hits, crashes, respawn on R, a respawn prompt when upside down.
 **Done when:** tests pass: at 30 m/s the drone does not pass through a 10 cm wall; it rests on the ground
@@ -64,10 +67,14 @@ without jitter; in the browser an upside-down drone shows the respawn prompt.
 Box-based world generator: lesson area (track, grid), city (roads, towers, wind turbines, cranes), map borders.
 **Done when:** map is ~400×400 m; 60 fps on a mid-range machine; leaving the borders returns you to spawn.
 
-### Stage 7. HUD, menus, settings `[ ]`
-Design tokens, HUD (speed, altitude, horizon), pause menu (Resume, Respawn, Settings, Main menu),
-settings (controls, rate presets, FOV/uptilt, graphics), main menu (Free flight, Flight school).
-SVG placeholder mascot.
+### Stage 7a. Flight HUD `[ ]`
+HUD like the original: speed (km/h) and altitude (m) top right, horizon marker in the centre.
+The debug panel moves behind F3.
+**Done when:** HUD shows correct values while flying; F3 toggles the debug panel.
+
+### Stage 7b. Menus and settings `[ ]`
+Design tokens, pause menu (Resume, Respawn, Settings, Main menu), settings (controls, rate presets,
+FOV/uptilt, graphics), main menu (Free flight, Flight school). SVG placeholder mascot.
 **Done when:** "menu → fly → pause → settings → back" works with mouse and keyboard; settings survive a reload.
 
 ## Lessons

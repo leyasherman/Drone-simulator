@@ -104,6 +104,34 @@ export class RigidBody {
     outOrientation.copy(this.prevOrientation).slerp(this.orientation, alpha);
   }
 
+  /**
+   * Instant impulse `j` (world, N·s) at world offset `r` from the centre. Changes velocity and spin now,
+   * not at the next step. Used by contact resolution.
+   */
+  applyImpulseAt(j: Vector3, r: Vector3): void {
+    this.velocity.addScaledVector(j, 1 / this.mass);
+    const dL = tmpA.crossVectors(r, j);
+    tmpInv.copy(this.orientation).invert();
+    dL.applyQuaternion(tmpInv);
+    this.angularVelocity.x += dL.x / this.inertia.x;
+    this.angularVelocity.y += dL.y / this.inertia.y;
+    this.angularVelocity.z += dL.z / this.inertia.z;
+  }
+
+  /** Velocity of a point at world offset `r` from the centre. */
+  pointVelocity(r: Vector3, out: Vector3): Vector3 {
+    this.worldAngularVelocity(out);
+    return out.cross(r).add(this.velocity);
+  }
+
+  /** World-space I⁻¹ · v. */
+  invInertiaWorld(v: Vector3, out: Vector3): Vector3 {
+    tmpInv.copy(this.orientation).invert();
+    out.copy(v).applyQuaternion(tmpInv);
+    out.set(out.x / this.inertia.x, out.y / this.inertia.y, out.z / this.inertia.z);
+    return out.applyQuaternion(this.orientation);
+  }
+
   /** Angular velocity in world axes. */
   worldAngularVelocity(out: Vector3): Vector3 {
     return out.copy(this.angularVelocity).applyQuaternion(this.orientation);
