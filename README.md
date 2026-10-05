@@ -46,12 +46,13 @@ npm run build      # production build in dist/
 - **Accounts (Supabase):** a guest account is made silently on the first visit; create an account with email and
   password to keep progress on any device. XP is awarded by the server, not the browser.
 - **Lesson editor** (main menu): fly to a spot and place gates or landing pads there, write the instructor
-  lines, record demo flights by flying, test the lesson, export and import it as JSON.
+  lines, record demo flights by flying, test the lesson, export and import it as JSON. Authors publish lessons
+  to every player (Flight School → Community).
 - **Flight recording and playback** (P in free flight), used for lesson demos.
 
 ## Coming next
 
-Publishing lessons from the editor to all players, a larger free-flight map, motor sound, polish.
+A larger free-flight map, motor sound, polish.
 
 ## Project docs
 

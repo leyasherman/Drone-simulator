@@ -215,3 +215,8 @@
 .ed-foot {
   margin-top: 12px;
 }
+
+.ed-foot {
+  display: grid;
+  gap: 8px;
+}

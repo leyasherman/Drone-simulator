@@ -33,6 +33,8 @@ export interface EditorHandlers {
   /** The draft changed (objectives moved, etc.). */
   changed(draft: Draft): void;
   exit(): void;
+  /** Publish to every player (authors only). Resolves to null on success or a message. */
+  publish?(draft: Draft): Promise<string | null>;
 }
 
 /** Writes value at a dotted path like "lesson.steps.0.lines.1.text". */
@@ -51,6 +53,9 @@ export class EditorPanel {
   private savedId: string;
   private recordingStep: string | null = null;
   private notice = '';
+  /** Shows the Publish button (the signed-in player is an author). */
+  private canPublish = false;
+  private publishing = false;
 
   constructor(
     parent: HTMLElement,
@@ -77,6 +82,29 @@ export class EditorPanel {
       this.render();
       this.on.changed(this.draft);
     }
+  }
+
+  setAuthor(isAuthor: boolean): void {
+    this.canPublish = isAuthor;
+    if (this.visible) this.render();
+  }
+
+  private async publish(): Promise<void> {
+    const v = validate(this.draft);
+    if (!v.ok) {
+      this.notice = 'Fix the problems listed below first.';
+      this.render();
+      return;
+    }
+    if (!this.on.publish) return;
+    this.save();
+    this.publishing = true;
+    this.notice = 'Publishing…';
+    this.render();
+    const err = await this.on.publish(this.draft);
+    this.publishing = false;
+    this.notice = err ?? 'Published. Every player now sees it under Flight School → Community.';
+    this.render();
   }
 
   get current(): Draft {
@@ -165,6 +193,9 @@ export class EditorPanel {
         return;
       case 'import':
         (this.root.querySelector('[data-file]') as HTMLInputElement).click();
+        return;
+      case 'publish':
+        void this.publish();
         return;
       case 'test': {
         const v = validate(this.draft);
@@ -388,7 +419,15 @@ export class EditorPanel {
       </section>
 
       <div data-status></div>
-      <footer class="ed-foot"><button class="mn-btn primary" data-act="test"><span class="mn-label">▶ Test lesson</span></button></footer>`;
+      <footer class="ed-foot">
+        <button class="mn-btn primary" data-act="test"><span class="mn-label">▶ Test lesson</span></button>
+        ${
+          this.canPublish
+            ? `<button class="mn-btn" data-act="publish" ${this.publishing ? 'disabled' : ''}>
+                <span class="mn-label">⇪ Publish to players</span></button>`
+            : '<p class="ed-tip">Publishing to all players is for authors (a signed-in account with the author role).</p>'
+        }
+      </footer>`;
 
     this.root.querySelector<HTMLInputElement>('[data-file]')!.addEventListener('change', (e) => {
       const f = (e.target as HTMLInputElement).files?.[0];

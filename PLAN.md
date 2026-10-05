@@ -119,7 +119,7 @@ JSON export and import (same format as content/lessons).
 **Done when:** a new lesson is made in the editor without touching code, passes the lesson schema, and can be
 played start to finish with Test; export then import gives the same lesson; tests cover the draft operations.
 
-### Stage 11b. Publish lessons through Supabase `[ ]`
+### Stage 11b. Publish lessons through Supabase `[x]`
 Lessons table with an author role; published lessons and their demo clips load for every player and show in the list.
 **Done when:** an author publishes a lesson from the editor and a fresh browser sees and plays it; non-authors cannot write lessons.
 

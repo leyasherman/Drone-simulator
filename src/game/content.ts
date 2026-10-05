@@ -57,3 +57,39 @@ export function allLessons(): Lesson[] {
 export function getClip(id: string): Clip | undefined {
   return clips.get(id);
 }
+
+// ---- Lessons published from the editor (loaded from the database at runtime) ----
+
+const bundledLessonIds = new Set(lessons.keys());
+const bundledClipIds = new Set(clips.keys());
+const remoteClipIds = new Set<string>();
+export const COMMUNITY_COURSE_ID = 'community';
+
+/** True for lessons that ship with the game (they cannot be replaced from the database). */
+export function isBundled(lessonId: string): boolean {
+  return bundledLessonIds.has(lessonId);
+}
+
+/**
+ * Replaces the set of database lessons. They are listed in a "Community" course after the built-in ones.
+ * Ids that clash with built-in lessons or clips are skipped.
+ */
+export function registerRemoteLessons(list: readonly Lesson[], remoteClips: Record<string, unknown>): void {
+  for (const id of [...lessons.keys()]) if (!bundledLessonIds.has(id)) lessons.delete(id);
+  for (const id of remoteClipIds) clips.delete(id);
+  remoteClipIds.clear();
+  for (const [id, data] of Object.entries(remoteClips)) {
+    if (bundledClipIds.has(id)) continue;
+    clips.set(id, clipFromJson(data));
+    remoteClipIds.add(id);
+  }
+  const ids: string[] = [];
+  for (const l of list) {
+    if (bundledLessonIds.has(l.id)) continue;
+    lessons.set(l.id, l);
+    ids.push(l.id);
+  }
+  const i = courses.findIndex((c) => c.id === COMMUNITY_COURSE_ID);
+  if (i >= 0) courses.splice(i, 1);
+  if (ids.length) courses.push({ id: COMMUNITY_COURSE_ID, title: 'Community', lessons: ids });
+}

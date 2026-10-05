@@ -21,6 +21,26 @@ the research in `sendline-main/docs/` or from PLAN.md.
 
 <!-- Entries below -->
 
+## D-025. Publishing lessons through Supabase
+- Date: 2026-10-05
+- Stage: 11b
+- Status: accepted
+- Tables: authors (user ids, added by hand with SQL, never from the app), lessons (id, author, lesson JSON,
+  published flag) and lesson_clips (demo clips as JSON, one row per clip). RLS: anyone reads published lessons and
+  their clips; authors also read their own unpublished ones; only authors insert, change or delete, and only their
+  own rows. Authorship is checked by is_author(), which also refuses guest (anonymous) sessions.
+- The client validates every lesson from the database with the lesson schema and skips bad rows. Database lessons
+  go into a "Community" course and can never replace a built-in lesson or clip.
+- Publish replaces the lesson's clips (delete, then insert the ones its steps use).
+- Live checks (scripted): 14/14 pass, including: guests and visitors read published lessons; guests cannot insert or
+  change lessons; an author cannot publish in someone else's name; unpublished lessons are hidden with their clips.
+  Not checked live: a guest id placed in authors still cannot write (needs a SQL step; covered by is_author()).
+- Browser run: a test author published from the editor; a fresh guest saw it under Community and played it.
+  The test lesson was then unpublished.
+- Authors: the user (once she has a game account). Pavel can be added later.
+- Clips as JSON in the database are ~100 KB each, fine for a few dozen lessons. Move to Storage (binary, CDN) if
+  lessons grow in number.
+
 ## D-024. Lesson editor (in the game)
 - Date: 2026-10-05
 - Stage: 11a

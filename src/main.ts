@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Autopilot } from './game/autopilot';
-import { allCourses, getLesson, nextLessonId } from './game/content';
+import { allCourses, getLesson, isBundled, nextLessonId, registerRemoteLessons } from './game/content';
+import { fetchRemoteLessons, isAuthor, publishDraft } from './net/lessons-remote';
 import { FreeFlight } from './game/free-flight';
 import { LessonSession } from './game/lesson-session';
 import { DraftStore, validate, type Draft } from './game/editor/draft';
@@ -78,7 +79,21 @@ void ensureSession().then(async (uid) => {
   await sync?.start();
   await account?.refresh();
   refreshPlayerChip();
+  await refreshRemote();
 });
+
+/** Loads lessons published from the editor (and your own unpublished ones), and whether you may publish. */
+async function refreshRemote(): Promise<void> {
+  if (!supabase) return;
+  const { data } = await supabase.auth.getUser();
+  const uid = data.user?.id ?? null;
+  const remote = await fetchRemoteLessons(supabase, uid);
+  registerRemoteLessons(
+    remote.lessons.filter((l) => l.published || l.mine).map((l) => l.lesson),
+    remote.clips,
+  );
+  editor.setAuthor(uid !== null && (await isAuthor(supabase)));
+}
 const hud = new Hud(document.body);
 const radio = new RadioOverlay(document.body);
 const prompts = new Prompts(document.body);
@@ -177,6 +192,7 @@ const accountPanel = account
         progress.replace({ completed: {}, totalXp: 0 });
         await ensureSession();
         await sync?.start();
+        await refreshRemote();
       },
       updated: () => refreshPlayerChip(),
     })
@@ -352,6 +368,15 @@ const editor = new EditorPanel(document.body, drafts, {
     if (editing) objectives.set(d.lesson.practice.objectives);
   },
   exit: () => showMainMenu(),
+  publish: async (d) => {
+    if (!supabase) return 'No connection to the server.';
+    if (isBundled(d.lesson.id)) return 'This id belongs to a built-in lesson. Change the id.';
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) return 'Sign in first.';
+    const err = await publishDraft(supabase, d, data.user.id);
+    if (!err) await refreshRemote();
+    return err;
+  },
 });
 
 function openEditor(): void {
