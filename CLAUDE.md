@@ -61,7 +61,15 @@ sendline-main/     reference prototype and research (read only, not in git, not 
   only as a reference for formulas and constants.
 - Physics constants from the research are fine as starting values to tune.
 
+## Git flow (team, from 2026-10-09)
+- `main` is production (live site), `development` collects finished work. Never commit or push to either.
+- Each stage gets its own branch off the latest `development`: `leya/<topic>` (`/feature_branch`).
+- Finished stage → pull request into `development` (`/pr_dev`). Pavel reviews and merges. Only Pavel releases to `main`.
+- Stage only the task's files by name. Never `git add -A` or `git add .`.
+- Details: [CONTRIBUTING.md](CONTRIBUTING.md). Commands: `.claude/commands/`.
+
 ## Working on a stage
+0. Start a branch: `/feature_branch <topic>`.
 1. Before starting: mark the stage `[~]` in PLAN.md and reread its "done when" criteria.
 2. Build only what the stage covers. Write anything extra into PLAN.md instead of doing it.
 3. Log meaningful choices in DECISIONS.md as you make them.
@@ -71,7 +79,8 @@ sendline-main/     reference prototype and research (read only, not in git, not 
 2. **Check:** run `npm run dev` and go through each "done when" criterion. In the report, say which were checked
    by tests and which by hand. Say plainly what was not checked.
 3. **Update:** mark the stage `[x]` in PLAN.md, add the stage's decisions to DECISIONS.md.
-4. **Commit:** one commit per stage, message `stage N: short description`. No `--no-verify`.
-   No `Co-Authored-By` trailer or any other AI attribution in commits (the user's rule).
+4. **Commit:** one commit per stage on its branch, message `feat: stage N short description`. No `--no-verify`.
+   No `Co-Authored-By` trailer or any other AI attribution in commits or PRs (the user's rule).
+   Push the branch and open the PR into `development` only after the user says so.
 5. **Report and wait:** short summary of what was done, how it was checked, what is left or risky.
    Do not start the next stage without the user's approval.

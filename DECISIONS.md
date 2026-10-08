@@ -21,6 +21,19 @@ the research in `sendline-main/docs/` or from PLAN.md.
 
 <!-- Entries below -->
 
+## D-026. Team git flow
+- Date: 2026-10-09
+- Stage: team setup
+- Status: accepted
+- Context: the project moves into Pavel's team; he holds merge rights for development and production.
+- Options: keep pushing to main / feature branches with PRs into development.
+- Decision: `main` = production, `development` = integration, `leya/<topic>` branch per stage, squash PRs into
+  `development`, release PRs into `main` with a merge commit. Pavel's slash commands adapted into
+  `.claude/commands/` (team-repo parts removed: tenants, release script, branching docs).
+- Why: the team's rule; Vercel gives each branch a preview URL for review.
+- Consequences: one Supabase project serves every branch (free tier), so migrations must stay backward compatible
+  with the code on `main`.
+
 ## D-025. Publishing lessons through Supabase
 - Date: 2026-10-05
 - Stage: 11b

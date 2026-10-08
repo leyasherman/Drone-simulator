@@ -142,11 +142,61 @@ progress; a bad password or a taken email shows a clear message.
 Motor sound from RPM, camera effects, Low/Medium/High quality, course 2, deploy to Vercel.
 **Done when:** the production URL works from first visit through a finished lesson and free flight.
 
+## Team backlog (Pavel, 2026-10-09)
+
+Work now goes through the team git flow: one branch per stage, PR into `development` (see CONTRIBUTING.md).
+Order is Pavel's. Front end first; Alessandro's design is merged in later, so screens use our tokens and stay
+easy to restyle. Stages 6 and 13 stay open; 13's sound part moves into stage 20.
+
+### Stage 14. Loading screen `[ ]`
+Shown while the scene, content and Supabase session load: logo placeholder, progress bar, tip line.
+**Done when:** a cold load shows it until the first frame is ready, then it fades to the intro page; no flash of an empty canvas.
+
+### Stage 15. Intro page `[ ]`
+Start page in front of the main menu: Play (free flight), Lessons, Editor, over one background
+(a slow camera move over the field, or a still image from Alessandro).
+**Done when:** each button leads where it says by mouse and keyboard; the background runs at 60 fps; works at phone width.
+
+### Stage 16. Two drones `[ ]`
+A second drone profile next to Freestyle 5" (own constants and model), picked in the menu, saved, used in free flight.
+**Done when:** tests show the two profiles fly differently (hover throttle, top speed); the choice survives a reload.
+
+### Stage 17. Achievements (5 samples) `[ ]`
+Achievement list with 5 sample entries, unlock checks during play, a toast on unlock, a screen with locked and unlocked.
+Granted by the server through RPC, like XP.
+**Done when:** each of the 5 can be unlocked in the browser; a direct client write is refused; unlocks survive a reload.
+
+### Stage 18. Shop (1 item) `[ ]`
+Shop screen with one item bought with XP (or a separate currency), through an RPC that checks the balance.
+**Done when:** buying with enough balance works once and applies the item; without enough it is refused; a direct write is refused.
+
+### Stage 19. Settings, full `[ ]`
+Study the reference sim's settings screen (all sections except accessibility) and rebuild it. Rates stay as they are.
+**Done when:** every setting we list applies at once and survives a reload; a list in docs/reference of what was copied and what was left out.
+
+### Stage 20. Master volume and motor sound `[ ]`
+Audio engine, motor sound from RPM, crash sound, master volume (and later music/effects) in settings.
+**Done when:** the motor pitch follows throttle; the volume slider changes it at once, 0 is silent; the value survives a reload.
+
+### Stage 21. Personal profile `[ ]`
+Profile screen: nickname, avatar placeholder, XP and level, lessons done, achievements, chosen drone.
+**Done when:** shows the same data in two browsers signed in to one account; a guest sees a prompt to sign up.
+
+### Stage 22. Replay (one) `[ ]`
+Keep the last flight and play it back with free cameras (FPV, chase, orbit) and a timeline.
+**Done when:** after a flight, Replay plays it with the right path; scrubbing the timeline works.
+
+### Stage 23. Map editor (playground) `[ ]`
+Place, move, rotate and delete boxes, gates and pads in a playground map, save and load it, fly it.
+**Done when:** a map built in the editor is saved, reloaded and flown with working collisions.
+
 ---
 
-## Out of scope (client's answer)
-Races, multiplayer, chat, skill chain, replay editor, shop, other drones, real radio calibration
-(the architecture allows it, built later).
+## Out of scope (client's answer, 2026-10-04)
+Races, multiplayer, chat, skill chain, replay editor, real radio calibration
+(the architecture allows it, built later). Shop and other drones moved into the team backlog on 2026-10-09.
 
 ## Open questions
 - What exactly the client means by "the lessons are inside like the editor" (affects stage 11).
+- Team backlog, to ask Pavel: which second drone; the 5 achievements; the shop item and currency; what
+  "Replay (only 1)" means; whose map editor "his playground" is; the intro background asset.
